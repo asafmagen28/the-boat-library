@@ -1,20 +1,20 @@
 erDiagram
-    lib_authors ||--o{ elib_books : "writes"
-    elib_books ||--o{ lib_copy : "has"
+    lib_authors ||--o{ lib_books : "writes"
+    lib_books ||--o{ lib_copy : "has"
     lib_copy ||--o{ lib_loans : "loaned_as"
     lib_copy }o--|| lib_status : "has_status"
-    
+
     lib_users ||--o{ lib_loans : "borrows"
     lib_users }o--|| lib_role : "has_role"
     lib_users ||--o{ lib_transactions : "receives (target)"
     lib_users ||--o{ lib_transactions : "initiates (actor)"
     lib_users ||--o{ lib_employee_codes : "creates"
-    
+
     lib_transactions }o--|| lib_transactions_type : "has_type"
     lib_loans ||--o| lib_transactions : "generates"
 
     lib_authors {
-        int ID PK
+        int id PK
         string firstName
         string surname
         timestamptz createdAt
@@ -22,10 +22,10 @@ erDiagram
         timestamptz deletedAt
     }
 
-    elib_books {
-        int ID PK
+    lib_books {
+        int id PK
         string title
-        int authorID FK
+        int authorId FK
         decimal price
         decimal fee
         timestamptz createdAt
@@ -34,68 +34,68 @@ erDiagram
     }
 
     lib_copy {
-        int ID PK
-        int bookID FK
-        int status FK
+        int id PK
+        int bookId FK
+        int statusId FK
         timestamptz createdAt
         timestamptz updatedAt
     }
 
     lib_users {
-        int ID PK
+        int id PK
         string username
         string password
-        int role FK
+        int roleId FK
         timestamptz createdAt
         timestamptz updatedAt
         timestamptz deletedAt
     }
 
     lib_loans {
-        int ID PK
-        int copyID FK
+        int id PK
+        int copyId FK
         decimal price
         decimal fee
         date loanDate
         date deadLineDate
         date returnDate
-        int loanedUser FK
+        int borrowerId FK
         timestamptz createdAt
         timestamptz updatedAt
     }
 
     lib_transactions {
-        int ID PK
+        int id PK
         decimal amount
-        int targetUserID FK
-        int actorID FK
-        int transType FK
-        int loanID FK "nullable"
+        int targetUserId FK
+        int actorId FK
+        int transTypeId FK
+        int loanId FK "nullable"
         timestamptz createdAt
         timestamptz updatedAt
     }
 
     lib_role {
-        int ID PK
+        int id PK
         string roleName
     }
 
     lib_status {
-        int ID PK
+        int id PK
         string status
     }
 
     lib_transactions_type {
-        int ID PK
+        int id PK
         string type
     }
 
     lib_employee_codes {
-        int ID PK
+        int id PK
         boolean isUsed
         string codeHash
         timestamptz expiresAt
-        int createdBy FK
+        int createdById FK
         timestamptz createdAt
         timestamptz updatedAt
     }
