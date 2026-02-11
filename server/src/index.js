@@ -5,6 +5,7 @@ import express from "express";
 import cors from "cors";
 import routes from "./routes/index.js";
 import { sequelize } from "./models/index.js";
+import errorHandler from "./middlewares/errorHandler.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -15,6 +16,7 @@ app.use(express.json());
 
 // Routes
 app.use("/api", routes);
+app.use(errorHandler);
 
 // Start server
 const start = async () => {
