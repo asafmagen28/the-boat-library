@@ -1,19 +1,16 @@
 import { DataTypes, Model } from "sequelize";
-import sequelize from "../config/database";
+import sequelize from "../config/database.js";
 
-class Status extends Model {
-  declare id: number;
-  declare status: string;
-}
+class Role extends Model {}
 
-Status.init(
+Role.init(
   {
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
     },
-    status: {
+    roleName: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
@@ -21,9 +18,9 @@ Status.init(
   },
   {
     sequelize,
-    tableName: "lib_status",
+    tableName: "lib_role",
     timestamps: false,
   }
 );
 
-export default Status;
+export default Role;

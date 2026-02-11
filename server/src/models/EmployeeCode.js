@@ -1,14 +1,7 @@
 import { DataTypes, Model } from "sequelize";
-import sequelize from "../config/database";
+import sequelize from "../config/database.js";
 
 class EmployeeCode extends Model {
-  declare id: number;
-  declare isUsed: boolean;
-  declare codeHash: string;
-  declare expiresAt: Date;
-  declare createdById: number;
-  declare createdAt: Date;
-  declare updatedAt: Date;
 }
 
 EmployeeCode.init(

@@ -1,12 +1,7 @@
 import { DataTypes, Model } from "sequelize";
-import sequelize from "../config/database";
+import sequelize from "../config/database.js";
 
 class Copy extends Model {
-  declare id: number;
-  declare bookId: number;
-  declare statusId: number;
-  declare createdAt: Date;
-  declare updatedAt: Date;
 }
 
 Copy.init(

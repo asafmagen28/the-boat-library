@@ -1,17 +1,7 @@
 import { DataTypes, Model } from "sequelize";
-import sequelize from "../config/database";
+import sequelize from "../config/database.js";
 
 class Loan extends Model {
-  declare id: number;
-  declare copyId: number;
-  declare price: number;
-  declare fee: number;
-  declare loanDate: string;
-  declare deadLineDate: string;
-  declare returnDate: string | null;
-  declare borrowerId: number;
-  declare createdAt: Date;
-  declare updatedAt: Date;
 }
 
 Loan.init(

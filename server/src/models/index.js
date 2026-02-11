@@ -1,14 +1,14 @@
-import sequelize from "../config/database";
-import Role from "./Role";
-import Status from "./Status";
-import TransactionType from "./TransactionType";
-import Author from "./Author";
-import User from "./User";
-import Book from "./Book";
-import Copy from "./Copy";
-import Loan from "./Loan";
-import Transaction from "./Transaction";
-import EmployeeCode from "./EmployeeCode";
+import sequelize from "../config/database.js";
+import Role from "./Role.js";
+import Status from "./Status.js";
+import TransactionType from "./TransactionType.js";
+import Author from "./Author.js";
+import User from "./User.js";
+import Book from "./Book.js";
+import Copy from "./Copy.js";
+import Loan from "./Loan.js";
+import Transaction from "./Transaction.js";
+import EmployeeCode from "./EmployeeCode.js";
 
 // --- Associations ---
 

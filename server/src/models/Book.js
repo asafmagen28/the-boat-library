@@ -1,15 +1,7 @@
 import { DataTypes, Model } from "sequelize";
-import sequelize from "../config/database";
+import sequelize from "../config/database.js";
 
 class Book extends Model {
-  declare id: number;
-  declare title: string;
-  declare authorId: number;
-  declare price: number;
-  declare fee: number;
-  declare createdAt: Date;
-  declare updatedAt: Date;
-  declare deletedAt: Date | null;
 }
 
 Book.init(

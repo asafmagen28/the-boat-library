@@ -1,17 +1,8 @@
 import { DataTypes, Model } from "sequelize";
-import sequelize from "../config/database";
+import sequelize from "../config/database.js";
 import bcrypt from "bcryptjs";
 
-class User extends Model {
-  declare id: number;
-  declare username: string;
-  declare password: string;
-  declare roleId: number;
-  declare createdAt: Date;
-  declare updatedAt: Date;
-  declare deletedAt: Date | null;
-  declare comparePassword: (candidate: string) => Promise<boolean>;
-}
+class User extends Model {}
 
 User.init(
   {
@@ -60,7 +51,7 @@ User.beforeSave(async (user) => {
   }
 });
 
-User.prototype.comparePassword = async function (candidate: string): Promise<boolean> {
+User.prototype.comparePassword = async function (candidate) {
   return bcrypt.compare(candidate, this.password);
 };
 

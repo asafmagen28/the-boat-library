@@ -1,19 +1,17 @@
 import { DataTypes, Model } from "sequelize";
-import sequelize from "../config/database";
+import sequelize from "../config/database.js";
 
-class Role extends Model {
-  declare id: number;
-  declare roleName: string;
+class TransactionType extends Model {
 }
 
-Role.init(
+TransactionType.init(
   {
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
     },
-    roleName: {
+    type: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
@@ -21,9 +19,9 @@ Role.init(
   },
   {
     sequelize,
-    tableName: "lib_role",
+    tableName: "lib_transactions_type",
     timestamps: false,
   }
 );
 
-export default Role;
+export default TransactionType;

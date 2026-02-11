@@ -1,15 +1,7 @@
 import { DataTypes, Model } from "sequelize";
-import sequelize from "../config/database";
+import sequelize from "../config/database.js";
 
 class Transaction extends Model {
-  declare id: number;
-  declare amount: number;
-  declare targetUserId: number;
-  declare actorId: number;
-  declare transTypeId: number;
-  declare loanId: number | null;
-  declare createdAt: Date;
-  declare updatedAt: Date;
 }
 
 Transaction.init(

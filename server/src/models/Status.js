@@ -1,19 +1,17 @@
 import { DataTypes, Model } from "sequelize";
-import sequelize from "../config/database";
+import sequelize from "../config/database.js";
 
-class TransactionType extends Model {
-  declare id: number;
-  declare type: string;
+class Status extends Model {
 }
 
-TransactionType.init(
+Status.init(
   {
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
     },
-    type: {
+    status: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
@@ -21,9 +19,9 @@ TransactionType.init(
   },
   {
     sequelize,
-    tableName: "lib_transactions_type",
+    tableName: "lib_status",
     timestamps: false,
   }
 );
 
-export default TransactionType;
+export default Status;
