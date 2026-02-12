@@ -14,6 +14,18 @@ Transaction.init(
     amount: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
+      validate: {
+        notNull: { msg: "Transaction amount is required" },
+        isDecimal: { msg: "Transaction amount must be a valid decimal" },
+        not0(value) {
+          if (Number(value) === 0) throw new Error("Transaction amount cannot be zero");
+        },
+        rangeCheck(value) {
+          if (Math.abs(Number(value)) > 10000) {
+            throw new Error("Transaction amount exceeds maximum allowed (10,000)");
+          }
+        },
+      },
     },
     targetUserId: {
       type: DataTypes.INTEGER,
