@@ -58,7 +58,9 @@ The system follows a comprehensive library management ERD defined in `ERD.mmd`:
 ### API Structure
 - Base API route: `/api`
 - Health check endpoint: `GET /api/health`
-- Router structure prepared for modular route expansion
+- Route files: `server/src/routes/*.routes.js` (mounted in `routes/index.js`)
+- Controllers: `server/src/controllers/*.controller.js`
+- Middlewares: `server/src/middlewares/` (authenticate, authorize, errorHandler)
 
 ## Development Notes
 
@@ -66,3 +68,12 @@ The system follows a comprehensive library management ERD defined in `ERD.mmd`:
 - Default scope excludes password field from User queries for security
 - Database connection is authenticated before server starts
 - Both frontend and backend use JavaScript with ES6+ modules and features
+
+### Auth & Security Conventions
+- JWT payload: `{ id, roleId, roleName }` — roleName avoids DB lookup per request
+- Middleware chain for protected routes: `authenticate → authorize("role") → handler`
+- Role names: `"employee"` and `"customer"` (matching Role.roleName in DB)
+- User budget is calculated via `Transaction.sum("amount")`, not a stored field
+- Signed amounts: deposits are positive, charges are negative
+- Express 5 catches async rejections natively — no need for express-async-errors
+- Global error handler is last middleware in `server/src/index.js`

@@ -6,14 +6,20 @@ import jwt from "jsonwebtoken";
  * On success, attaches decoded payload { id, roleId, roleName } to req.user.
  */
 const authenticate = (req, res, next) => {
-  try {
-    const token = req.headers.authorization?.split(" ")[1];
-    if (!token) throw new Error("");
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ error: "Authentication required" });
+  }
 
+  try {
     req.user = jwt.verify(token, process.env.JWT_SECRET);
     next();
   } catch (error) {
-    return res.status(401).json({ error: "Authentication required" });
+    console.warn("JWT auth failed:", error.name);
+    const message = error.name === "TokenExpiredError" ? "Token has expired"
+      : error.name === "JsonWebTokenError" ? "Token is invalid"
+      : "Authorization error";
+    return res.status(401).json({ error: message });
   }
 };
 
