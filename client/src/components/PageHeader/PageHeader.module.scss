@@ -1,0 +1,16 @@
+@use '../../styles/variables' as *;
+
+.header {
+  margin-bottom: $spacing-xl;
+}
+
+.title {
+  font-size: $font-size-3xl;
+  color: $text-primary;
+}
+
+.subtitle {
+  margin-top: $spacing-xs;
+  font-size: $font-size-base;
+  color: $text-secondary;
+}
