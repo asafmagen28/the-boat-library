@@ -1,0 +1,25 @@
+@use '../../styles/variables' as *;
+
+.layout {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: $bg-light;
+}
+
+.card {
+  background-color: $bg-white;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-lg;
+  padding: $spacing-2xl;
+  width: 100%;
+  max-width: 420px;
+}
+
+.logo {
+  text-align: center;
+  color: $primary;
+  margin-bottom: $spacing-xl;
+  font-size: $font-size-2xl;
+}
