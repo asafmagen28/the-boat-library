@@ -1,0 +1,70 @@
+@use '../../styles/variables' as *;
+
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: $navbar-height;
+  padding: 0 $spacing-xl;
+  background-color: $bg-navbar;
+  color: $text-white;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+}
+
+.left {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xl;
+}
+
+.logo {
+  font-size: $font-size-xl;
+  font-weight: 700;
+  color: $text-white;
+
+  &:hover {
+    color: $primary-light;
+  }
+}
+
+.links {
+  display: flex;
+  gap: $spacing-md;
+
+  a {
+    color: $text-light;
+    font-size: $font-size-sm;
+
+    &:hover {
+      color: $text-white;
+    }
+  }
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+}
+
+.username {
+  font-size: $font-size-sm;
+  color: $text-muted;
+}
+
+.roleToggle {
+  padding: $spacing-xs $spacing-sm;
+  font-size: $font-size-sm;
+  background-color: $primary;
+  color: $text-white;
+  border: 1px solid $primary-light;
+  border-radius: $radius-sm;
+
+  &:hover {
+    background-color: $primary-light;
+  }
+}
