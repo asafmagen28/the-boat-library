@@ -1,8 +1,8 @@
 import styles from './Placeholder.module.scss';
 
-export default function Placeholder({ pageName, description }) {
+export default function Placeholder({ id, pageName, description }) {
   return (
-    <div className={styles.card}>
+    <div id={id} className={styles.card}>
       <h2 className={styles.title}>{pageName}</h2>
       <p className={styles.description}>
         {description || 'This page is coming soon.'}

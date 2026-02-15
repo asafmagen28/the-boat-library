@@ -78,6 +78,16 @@ The system follows a comprehensive library management ERD defined in `ERD.mmd`:
 - Express 5 catches async rejections natively — no need for express-async-errors
 - Global error handler is last middleware in `server/src/index.js`
 
+### Frontend ID Conventions (QA Automation)
+- **Every** interactive and important element must have an `id` attribute
+- Use **kebab-case**: `id="login-email-input"`, `id="navbar-logo"`
+- Page containers: `id="{page-name}-page"` (e.g., `id="login-page"`)
+- Buttons: `id="{context}-{action}-btn"` (e.g., `id="navbar-logout-btn"`)
+- Nav links: `id="nav-link-{label}"` (e.g., `id="nav-link-home"`)
+- Dynamic/listed items: include the entity ID (e.g., `id="book-card-{book.id}"`)
+- Reusable components (`Button`, `FormInput`, etc.) accept an optional `id` prop and pass it to the underlying HTML element
+- `FormInput` links `<label htmlFor={id}>` to `<input id={id}>` for accessibility
+
 ## Learning-Focused Guidance
 
 **IMPORTANT**: This project is for learning purposes. When working with this codebase:

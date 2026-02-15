@@ -3,9 +3,9 @@ import Placeholder from '../../components/Placeholder/Placeholder';
 
 export default function LoginPage() {
   return (
-    <>
-      <PageHeader title="Login" />
-      <Placeholder pageName="Login" description="Sign in form will be implemented in Phase 3." />
-    </>
+    <section id="login-page">
+      <PageHeader id="login-page-header" title="Login" />
+      <Placeholder id="login-placeholder" pageName="Login" description="Sign in form will be implemented in Phase 3." />
+    </section>
   );
 }

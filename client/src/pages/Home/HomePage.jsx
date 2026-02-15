@@ -23,20 +23,21 @@ export default function HomePage() {
   const cards = user?.roleName === 'employee' ? employeeCards : customerCards;
 
   return (
-    <div>
+    <section id="home-page">
       <PageHeader
+        id="home-page-header"
         title={`Welcome, ${user?.username}!`}
         subtitle="What would you like to do today?"
       />
       <div className={styles.grid}>
         {cards.map((card) => (
-          <Link key={card.to} to={card.to} className={styles.card}>
+          <Link key={card.to} id={`home-card-${card.to.replace(/\//g, '-').replace(/^-/, '')}`} to={card.to} className={styles.card}>
             <span className={styles.icon}>{card.icon}</span>
             <h3 className={styles.cardTitle}>{card.title}</h3>
             <p className={styles.cardDesc}>{card.desc}</p>
           </Link>
         ))}
       </div>
-    </div>
+    </section>
   );
 }

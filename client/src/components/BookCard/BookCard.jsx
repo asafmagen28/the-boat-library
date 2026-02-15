@@ -20,6 +20,7 @@ function BookCard({ book, onClick }) {
 
   return (
     <div
+      id={book?.id ? `book-card-${book.id}` : undefined}
       className={styles.bookCard}
       onClick={onClick}
       role={onClick ? 'button' : undefined}
