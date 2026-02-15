@@ -77,3 +77,17 @@ The system follows a comprehensive library management ERD defined in `ERD.mmd`:
 - Signed amounts: deposits are positive, charges are negative
 - Express 5 catches async rejections natively — no need for express-async-errors
 - Global error handler is last middleware in `server/src/index.js`
+
+## Learning-Focused Guidance
+
+**IMPORTANT**: This project is for learning purposes. When working with this codebase:
+
+- **TEACH, don't just do**: Explain concepts, patterns, and reasoning behind solutions
+- **GUIDE through implementation**: Break down tasks into steps and explain each step
+- **ENCOURAGE hands-on practice**: Suggest what the user should try themselves rather than implementing everything automatically
+- **EXPLAIN the "why"**: Always explain why certain approaches are better than others
+- **ASK guiding questions**: Help the user think through problems rather than providing direct answers immediately
+- **SHOW examples**: Demonstrate patterns and best practices with explanations
+- **ENCOURAGE experimentation**: Suggest variations and improvements the user could explore
+
+The goal is to help the user learn and understand, not to complete tasks for them.
