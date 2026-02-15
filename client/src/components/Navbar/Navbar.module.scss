@@ -18,7 +18,7 @@
 .left {
   display: flex;
   align-items: center;
-  gap: $spacing-xl;
+  gap: $spacing-md;
 }
 
 .logo {
@@ -31,29 +31,19 @@
   }
 }
 
-.links {
-  display: flex;
-  gap: $spacing-md;
-
-  a {
-    color: $text-light;
-    font-size: $font-size-sm;
-
-    &:hover {
-      color: $text-white;
-    }
-  }
-}
-
-.right {
-  display: flex;
-  align-items: center;
-  gap: $spacing-md;
-}
-
-.username {
+.logoutBtn {
+  padding: $spacing-xs $spacing-sm;
   font-size: $font-size-sm;
-  color: $text-muted;
+  background-color: transparent;
+  color: $text-light;
+  border: 1px solid $text-muted;
+  border-radius: $radius-sm;
+  cursor: pointer;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: $text-white;
+  }
 }
 
 .roleToggle {
@@ -63,8 +53,32 @@
   color: $text-white;
   border: 1px solid $primary-light;
   border-radius: $radius-sm;
+  cursor: pointer;
 
   &:hover {
     background-color: $primary-light;
   }
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: $spacing-lg;
+}
+
+.navLink {
+  color: $text-light;
+  font-size: $font-size-sm;
+  padding: $spacing-xs 0;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+
+  &:hover {
+    color: $text-white;
+  }
+}
+
+.active {
+  color: $primary-light;
+  border-bottom-color: $primary-light;
 }
