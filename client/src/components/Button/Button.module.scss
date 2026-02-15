@@ -1,0 +1,30 @@
+@use '../../styles/variables' as *;
+
+.button {
+  padding: $spacing-sm $spacing-md;
+  border-radius: $radius-sm;
+  font-size: $font-size-base;
+  cursor: pointer;
+  border: 1px solid transparent;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.primary {
+  background-color: $primary;
+  color: white;
+}
+
+.danger {
+  background-color: $danger;
+  color: white;
+}
+
+.outline {
+  background-color: transparent;
+  color: $primary;
+  border-color: $primary;
+}
