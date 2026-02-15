@@ -3,9 +3,9 @@ import Placeholder from '../../components/Placeholder/Placeholder';
 
 export default function AuthorsPage() {
   return (
-    <>
-      <PageHeader title="Authors" subtitle="Discover authors and their works" />
-      <Placeholder pageName="Authors" description="Author listing will be implemented in a future phase." />
-    </>
+    <section id="authors-page">
+      <PageHeader id="authors-page-header" title="Authors" subtitle="Discover authors and their works" />
+      <Placeholder id="authors-placeholder" pageName="Authors" description="Author listing will be implemented in a future phase." />
+    </section>
   );
 }
