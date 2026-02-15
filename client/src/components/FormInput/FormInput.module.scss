@@ -1,0 +1,32 @@
+@use '../../styles/variables' as *;
+
+.formInput {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+  margin-bottom: $spacing-md;
+}
+
+.label {
+  font-size: $font-size-sm;
+  font-weight: 600;
+  color: $text-primary;
+}
+
+.input {
+  padding: $spacing-sm;
+  border: 1px solid $border-color;
+  border-radius: $radius-sm;
+  font-size: $font-size-base;
+
+  &:focus {
+    outline: none;
+    border-color: $primary;
+    box-shadow: 0 0 0 2px rgba($primary, 0.2);
+  }
+}
+
+.error {
+  font-size: $font-size-sm;
+  color: $danger;
+}
