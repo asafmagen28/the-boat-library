@@ -77,3 +77,27 @@ The system follows a comprehensive library management ERD defined in `ERD.mmd`:
 - Signed amounts: deposits are positive, charges are negative
 - Express 5 catches async rejections natively — no need for express-async-errors
 - Global error handler is last middleware in `server/src/index.js`
+
+### Frontend ID Conventions (QA Automation)
+- **Every** interactive and important element must have an `id` attribute
+- Use **kebab-case**: `id="login-email-input"`, `id="navbar-logo"`
+- Page containers: `id="{page-name}-page"` (e.g., `id="login-page"`)
+- Buttons: `id="{context}-{action}-btn"` (e.g., `id="navbar-logout-btn"`)
+- Nav links: `id="nav-link-{label}"` (e.g., `id="nav-link-home"`)
+- Dynamic/listed items: include the entity ID (e.g., `id="book-card-{book.id}"`)
+- Reusable components (`Button`, `FormInput`, etc.) accept an optional `id` prop and pass it to the underlying HTML element
+- `FormInput` links `<label htmlFor={id}>` to `<input id={id}>` for accessibility
+
+## Learning-Focused Guidance
+
+**IMPORTANT**: This project is for learning purposes. When working with this codebase:
+
+- **TEACH, don't just do**: Explain concepts, patterns, and reasoning behind solutions
+- **GUIDE through implementation**: Break down tasks into steps and explain each step
+- **ENCOURAGE hands-on practice**: Suggest what the user should try themselves rather than implementing everything automatically
+- **EXPLAIN the "why"**: Always explain why certain approaches are better than others
+- **ASK guiding questions**: Help the user think through problems rather than providing direct answers immediately
+- **SHOW examples**: Demonstrate patterns and best practices with explanations
+- **ENCOURAGE experimentation**: Suggest variations and improvements the user could explore
+
+The goal is to help the user learn and understand, not to complete tasks for them.
