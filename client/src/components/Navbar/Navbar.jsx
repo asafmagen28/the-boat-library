@@ -10,6 +10,7 @@ const employeeLinks = [
   { to: '/manage/customers', label: 'Customers', id: 'nav-link-customers' },
   { to: '/manage/loans', label: 'Manage Loans', id: 'nav-link-manage-loans' },
   { to: '/reports', label: 'Reports', id: 'nav-link-reports' },
+  { to: '/employee-codes', label: 'Codes', id: 'nav-link-codes'}
 ];
 
 const customerLinks = [
@@ -21,13 +22,9 @@ const customerLinks = [
 ];
 
 export default function Navbar() {
-  const { user, logout, switchRole } = useAuth();
+  const { user, logout } = useAuth();
 
   const links = user?.roleId === ROLES.EMPLOYEE ? employeeLinks : customerLinks;
-
-  const toggleRole = () => {
-    switchRole(user.roleId === ROLES.EMPLOYEE ? ROLES.CUSTOMER : ROLES.EMPLOYEE);
-  };
 
   return (
     <nav id="navbar" className={styles.navbar}>
@@ -37,9 +34,6 @@ export default function Navbar() {
         </NavLink>
         <button id="navbar-logout-btn" className={styles.logoutBtn} onClick={logout}>
           LogOut
-        </button>
-        <button id="navbar-role-toggle" className={styles.roleToggle} onClick={toggleRole}>
-          Role: {user?.roleId === ROLES.EMPLOYEE ? 'employee' : 'customer'}
         </button>
       </div>
 
