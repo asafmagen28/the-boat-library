@@ -1,32 +1,51 @@
-import { createContext, useContext, useState, useCallback } from 'react';
-import { ROLES } from '../constants/roles';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { authAPI } from '../services/api';
 
 const AuthContext = createContext(null);
 
-const FAKE_USER = {
-  id: 1,
-  username: 'dev_user',
-  roleId: ROLES.EMPLOYEE,
-};
+function decodeToken(token) {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    
+    return { id: payload.id, username: payload.username, roleId: payload.roleId };
+  } catch {
+    return null;
+  }
+}
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(FAKE_USER);
+  const [user, setUser] = useState(null);
 
-  const switchRole = useCallback((role) => {
-    setUser((prev) => (prev ? { ...prev, roleId: role } : prev));
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      const decoded = decodeToken(token);
+      if (decoded) {
+        setUser(decoded);
+      } else {
+        localStorage.removeItem('token');
+      }
+    }
   }, []);
 
-  // Stubs for Phase 3 — will be replaced with real JWT logic
-  const login = useCallback((userData) => {
-    setUser(userData);
+  const login = useCallback(async (username, password) => {
+    const { data } = await authAPI.login(username, password);
+    localStorage.setItem('token', data.token);
+    setUser(decodeToken(data.token));
+  }, []);
+
+  const loginWithToken = useCallback((token) => {
+    localStorage.setItem('token', token);
+    setUser(decodeToken(token));
   }, []);
 
   const logout = useCallback(() => {
+    localStorage.removeItem('token');
     setUser(null);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, switchRole, login, logout }}>
+    <AuthContext.Provider value={{ user, login, loginWithToken, logout }}>
       {children}
     </AuthContext.Provider>
   );
