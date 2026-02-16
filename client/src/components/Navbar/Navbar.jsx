@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { ROLES } from '../../constants/roles';
 import styles from './Navbar.module.scss';
 
 const employeeLinks = [
@@ -22,10 +23,10 @@ const customerLinks = [
 export default function Navbar() {
   const { user, logout, switchRole } = useAuth();
 
-  const links = user?.roleName === 'employee' ? employeeLinks : customerLinks;
+  const links = user?.roleId === ROLES.EMPLOYEE ? employeeLinks : customerLinks;
 
   const toggleRole = () => {
-    switchRole(user.roleName === 'employee' ? 'customer' : 'employee');
+    switchRole(user.roleId === ROLES.EMPLOYEE ? ROLES.CUSTOMER : ROLES.EMPLOYEE);
   };
 
   return (
@@ -38,7 +39,7 @@ export default function Navbar() {
           LogOut
         </button>
         <button id="navbar-role-toggle" className={styles.roleToggle} onClick={toggleRole}>
-          Role: {user?.roleName}
+          Role: {user?.roleId === ROLES.EMPLOYEE ? 'employee' : 'customer'}
         </button>
       </div>
 

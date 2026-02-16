@@ -1,4 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
+import { ROLES } from './constants/roles';
 
 import MainLayout from './layouts/MainLayout/MainLayout';
 import AuthLayout from './layouts/AuthLayout/AuthLayout';
@@ -38,13 +39,13 @@ export default function App() {
           <Route path="/authors" element={<AuthorsPage />} />
 
           {/* Customer only */}
-          <Route element={<ProtectedRoute allowedRoles={["customer"]} />}>
+          <Route element={<ProtectedRoute allowedRoles={[ROLES.CUSTOMER]} />}>
             <Route path="/my-loans" element={<MyLoansPage />} />
             <Route path="/budget" element={<BudgetPage />} />
           </Route>
 
           {/* Employee only */}
-          <Route element={<ProtectedRoute allowedRoles={["employee"]} />}>
+          <Route element={<ProtectedRoute allowedRoles={[ROLES.EMPLOYEE]} />}>
             <Route path="/manage/loans" element={<ManageLoansPage />} />
             <Route path="/manage/customers" element={<ManageCustomersPage />} />
             <Route path="/reports" element={<ReportsPage />} />

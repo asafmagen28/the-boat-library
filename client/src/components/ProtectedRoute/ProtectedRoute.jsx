@@ -8,7 +8,7 @@ export default function ProtectedRoute({ allowedRoles }) {
     return <Navigate to="/login" replace />;
   }
 
-  if (allowedRoles && !allowedRoles.includes(user.roleName)) {
+  if (allowedRoles && !allowedRoles.includes(user.roleId)) {
     return <Navigate to="/access-denied" replace />;
   }
 
