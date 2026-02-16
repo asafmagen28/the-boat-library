@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Server (Node.js + Express + JavaScript)
 ```bash
 cd server
-npm run dev          # Start development server with nodemon
+npm run dev          # Start development server with nodemon (port 3001)
 npm start           # Run production build
 ```
 
@@ -16,67 +16,92 @@ npm start           # Run production build
 cd client
 npm start           # Start development server (port 3000)
 npm run build       # Build for production
-npm test           # Run Jest tests
+npm test            # Run Jest tests (interactive watch mode)
+npm test -- --watchAll=false              # Run all tests once (CI mode)
+npm test -- --testPathPattern=Login       # Run tests matching "Login"
 ```
+
+### Required Environment Variables (server)
+- `JWT_SECRET` — **required**, no default, validated on startup
+- `DB_USER`, `DB_NAME`, `DB_HOST`, `DB_PORT` — have defaults (see `server/src/config/database.js`)
+- `DB_PASSWORD` — defaults to empty string
+- `NODE_ENV` — affects error detail level and CORS policy
+- `CLIENT_URL` — used for CORS in production
+- `PORT` — defaults to 3001
 
 ## Architecture Overview
 
-This is a full-stack library management system with a React frontend and Express backend.
+Full-stack library management system: React frontend + Express backend + PostgreSQL.
 
 ### Backend Structure (/server)
-- **Technology Stack**: Express.js, JavaScript, Sequelize ORM, PostgreSQL
-- **Database**: PostgreSQL with Sequelize ORM for models and migrations
-- **Authentication**: bcryptjs for password hashing (User model includes password hashing hooks)
-- **Port**: 3001 (configurable via PORT environment variable)
+- **Stack**: Express 5, Sequelize ORM, PostgreSQL, JWT auth
+- **Request flow**: `route → authenticate → authorize → controller → service → model`
+- **Controller → Service pattern**: Controllers handle HTTP (req/res), services handle business logic (see `auth.controller.js` → `auth.service.js`)
+- **Models auto-sync** on startup via `sequelize.sync()` — no migration files yet
+- **Startup sequence**: validate env vars → authenticate DB connection → sync models → listen
 
 ### Database Schema
-The system follows a comprehensive library management ERD defined in `ERD.mmd`:
-- **Core Entities**: Authors, Books, Copies (physical book instances), Users, Loans
-- **Supporting Entities**: Roles (user permissions), Status (copy availability), Transactions, Employee Codes
-- **Key Relationships**:
-  - Authors write Books, Books have multiple Copies
-  - Users borrow Copies through Loans
-  - Transactions track financial operations linked to Loans
-  - Users have Roles, Copies have Status
+ERD defined in `ERD.mmd`. Key entities and relationships:
+- **Authors → Books → Copies**: Authors write books, books have physical copy instances
+- **Users → Loans → Copies**: Users borrow copies through loans
+- **Transactions**: Financial records linked to users (and optionally loans). Signed amounts: deposits positive, charges negative
+- **Roles / Status / TransactionType**: Lookup tables (no timestamps)
+- **EmployeeCode**: Invitation codes for employee registration (bcrypt-hashed, have expiry)
+- **Soft deletion** (`paranoid: true`): enabled on User, Book, Author
 
-### Model Relationships (server/src/models/index.js)
-- Complex many-to-many and one-to-many associations fully configured
-- Soft deletion enabled for Users, Books, Authors (paranoid: true)
-- Password hashing and comparison methods in User model
-- Foreign key constraints and indexes defined
-
-### Frontend Structure (/client)
-- **Technology Stack**: React 19, JavaScript, Sass, Create React App
-- **Testing**: Jest with React Testing Library
-- **Port**: 3000
-
-### Environment Configuration
-- Server uses dotenv for environment variables
-- Database configuration in `server/src/config/database.js`
-- Default database: PostgreSQL on localhost:5432
+### Model Associations (server/src/models/index.js)
+- All relationships centralized in `models/index.js`
+- Transaction has dual User relationship: `targetUserId` (receiver) and `actorId` (initiator), using aliases `receivedTransactions` / `initiatedTransactions`
+- User default scope excludes password — use `User.scope(null)` to include it
 
 ### API Structure
-- Base API route: `/api`
-- Health check endpoint: `GET /api/health`
+- Base route: `/api`, health check: `GET /api/health`
 - Route files: `server/src/routes/*.routes.js` (mounted in `routes/index.js`)
-- Controllers: `server/src/controllers/*.controller.js`
-- Middlewares: `server/src/middlewares/` (authenticate, authorize, errorHandler)
+- Many endpoints are **stubs returning 501** — check route files before implementing
+
+### Frontend Structure (/client)
+- **Stack**: React 19, React Router v7, Sass (CSS Modules), Create React App
+
+#### Provider & Layout Hierarchy
+```
+<BrowserRouter>
+  <AuthProvider>           ← context/AuthContext.jsx
+    <App>                  ← App.jsx (route definitions)
+      <AuthLayout>         ← for /login, /register (centered card)
+      <MainLayout>         ← for all other pages (Navbar + content + Footer)
+```
+
+#### Routing & Access Control
+- `<PublicRoute>` — redirects authenticated users to `/`
+- `<ProtectedRoute>` — redirects unauthenticated users to `/login`
+- `<ProtectedRoute allowedRoles={[ROLES.CUSTOMER]}>` — redirects unauthorized users to `/access-denied`
+
+#### Styling
+- CSS Modules: each component imports `./Component.module.scss`
+- Global variables in `client/src/styles/_variables.scss` (colors, spacing, typography)
+- Import variables in modules with `@use '../../../styles/variables'`
 
 ## Development Notes
 
-- Models are auto-synced with database on server start
-- Default scope excludes password field from User queries for security
-- Database connection is authenticated before server starts
-- Both frontend and backend use JavaScript with ES6+ modules and features
-
 ### Auth & Security Conventions
-- JWT payload: `{ id, roleId, roleName }` — roleName avoids DB lookup per request
-- Middleware chain for protected routes: `authenticate → authorize("role") → handler`
-- Role names: `"employee"` and `"customer"` (matching Role.roleName in DB)
-- User budget is calculated via `Transaction.sum("amount")`, not a stored field
-- Signed amounts: deposits are positive, charges are negative
+- JWT payload: `{ id, roleId, roleName }` — includes both for flexibility
+- Backend `authorize()` middleware checks **roleName strings**: `authorize("employee")`
+- Frontend role checks use **roleId constants** from `client/src/constants/roles.js`: `ROLES.EMPLOYEE = 1`, `ROLES.CUSTOMER = 2`
+- Middleware chain: `authenticate → authorize("role") → handler`
+- User budget is **calculated** via `Transaction.sum("amount")`, not a stored field
 - Express 5 catches async rejections natively — no need for express-async-errors
 - Global error handler is last middleware in `server/src/index.js`
+- Error handler sanitizes 500-level errors in production to "Internal Server Error"
+
+### Employee Registration Flow
+Registration has a special employee code flow (see `auth.service.js`):
+1. If `employeeCode` provided, fetch all unused non-expired codes from DB
+2. Loop through codes using `bcrypt.compare` (codes are hashed)
+3. If match found → assign "employee" role; otherwise → assign "customer" role
+4. Entire operation (create user + mark code used) wrapped in a Sequelize transaction
+
+### AuthContext (client/src/context/AuthContext.jsx)
+Currently stubbed with a `FAKE_USER` for development. Provides `user`, `login`, `logout`, and `switchRole` (dev-only toggle between employee/customer).
 
 ### Frontend ID Conventions (QA Automation)
 - **Every** interactive and important element must have an `id` attribute
