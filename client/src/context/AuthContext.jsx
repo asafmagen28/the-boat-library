@@ -1,18 +1,19 @@
 import { createContext, useContext, useState, useCallback } from 'react';
+import { ROLES } from '../constants/roles';
 
 const AuthContext = createContext(null);
 
 const FAKE_USER = {
   id: 1,
   username: 'dev_user',
-  roleName: 'employee',
+  roleId: ROLES.EMPLOYEE,
 };
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(FAKE_USER);
 
   const switchRole = useCallback((role) => {
-    setUser((prev) => (prev ? { ...prev, roleName: role } : prev));
+    setUser((prev) => (prev ? { ...prev, roleId: role } : prev));
   }, []);
 
   // Stubs for Phase 3 — will be replaced with real JWT logic

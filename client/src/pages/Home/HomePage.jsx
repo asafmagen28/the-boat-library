@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { ROLES } from '../../constants/roles';
 import PageHeader from '../../components/PageHeader/PageHeader';
 import styles from './HomePage.module.scss';
 
@@ -20,7 +21,7 @@ const employeeCards = [
 
 export default function HomePage() {
   const { user } = useAuth();
-  const cards = user?.roleName === 'employee' ? employeeCards : customerCards;
+  const cards = user?.roleId === ROLES.EMPLOYEE ? employeeCards : customerCards;
 
   return (
     <section id="home-page">
