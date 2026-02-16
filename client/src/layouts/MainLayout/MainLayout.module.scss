@@ -1,0 +1,17 @@
+@use '../../styles/variables' as *;
+
+.layout {
+  min-height: 100vh;
+}
+
+.main {
+  margin-top: $navbar-height;
+  min-height: calc(100vh - $navbar-height);
+  display: flex;
+  flex-direction: column;
+}
+
+.content {
+  flex: 1;
+  padding: $spacing-xl;
+}
