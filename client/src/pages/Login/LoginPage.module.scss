@@ -1,0 +1,38 @@
+@use '../../styles/variables' as *;
+
+.title {
+  text-align: center;
+  font-size: $font-size-2xl;
+  margin-bottom: $spacing-xl;
+  color: $text-primary;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.error {
+  padding: $spacing-sm $spacing-md;
+  background-color: rgba($danger, 0.1);
+  color: $danger;
+  border-radius: $radius-sm;
+  font-size: $font-size-sm;
+}
+
+.footer {
+  text-align: center;
+  margin-top: $spacing-lg;
+  color: $text-secondary;
+  font-size: $font-size-sm;
+}
+
+.link {
+  color: $primary;
+  font-weight: 600;
+
+  &:hover {
+    color: $primary-light;
+  }
+}
