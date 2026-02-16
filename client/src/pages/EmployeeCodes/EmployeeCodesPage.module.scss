@@ -1,0 +1,53 @@
+@use '../../styles/variables' as *;
+
+.content {
+  max-width: 500px;
+}
+
+.error {
+  margin-top: $spacing-md;
+  padding: $spacing-sm $spacing-md;
+  background-color: rgba($danger, 0.1);
+  color: $danger;
+  border-radius: $radius-sm;
+  font-size: $font-size-sm;
+}
+
+.codeCard {
+  margin-top: $spacing-xl;
+  padding: $spacing-xl;
+  background-color: $bg-white;
+  border: 1px solid $border-color;
+  border-radius: $radius-md;
+  box-shadow: $shadow-sm;
+}
+
+.warning {
+  color: $warning;
+  font-weight: 600;
+  font-size: $font-size-sm;
+  margin-bottom: $spacing-md;
+}
+
+.codeBox {
+  padding: $spacing-md;
+  background-color: $bg-light;
+  border: 1px solid $border-dark;
+  border-radius: $radius-sm;
+  text-align: center;
+}
+
+.codeValue {
+  font-family: $font-mono;
+  font-size: $font-size-lg;
+  color: $primary-dark;
+  letter-spacing: 0.05em;
+  word-break: break-all;
+  user-select: all;
+}
+
+.expiry {
+  margin-top: $spacing-md;
+  color: $text-secondary;
+  font-size: $font-size-sm;
+}
