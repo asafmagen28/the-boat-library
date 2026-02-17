@@ -2,6 +2,32 @@ import bcrypt from "bcryptjs";
 import { sequelize, User, Role, EmployeeCode } from "../models/index.js";
 import { Op } from "sequelize";
 
+export const loginUser = async ({ username, password }) => {
+  
+  const user = await User.scope(null).findOne({
+    where: { username },
+    include: {
+      model: Role,
+      as: 'role'
+    },
+  });
+
+  if (!user) {
+    const err = new Error("Invalid credentials");
+    err.status = 401;
+    throw err;
+  }
+
+  const isMatch = await user.comparePassword(password);
+  if (!isMatch) {
+    const err = new Error("Invalid credentials");
+    err.status = 401;
+    throw err;
+  }  
+
+  return { user };
+};
+
 export const registerUser = async ({ username, password, employeeCode }) => {
   const user = await User.findOne({ where: { username }, paranoid: false });
   let foundCode = null;
@@ -55,7 +81,7 @@ export const registerUser = async ({ username, password, employeeCode }) => {
     }
 
     await transaction.commit();
-    return { user: newUser, roleName };
+    return { user: newUser };
   } catch (err) {
     await transaction.rollback();
     throw err;
