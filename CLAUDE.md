@@ -60,15 +60,16 @@ ERD defined in `ERD.mmd`. Key entities and relationships:
 - Many endpoints are **stubs returning 501** — check route files before implementing
 
 ### Frontend Structure (/client)
-- **Stack**: React 19, React Router v7, Sass (CSS Modules), Create React App
+- **Stack**: React 19, React Router v7, Sass (CSS Modules), Create React App, React Query (@tanstack/react-query)
 
 #### Provider & Layout Hierarchy
 ```
-<BrowserRouter>
-  <AuthProvider>           ← context/AuthContext.jsx
-    <App>                  ← App.jsx (route definitions)
-      <AuthLayout>         ← for /login, /register (centered card)
-      <MainLayout>         ← for all other pages (Navbar + content + Footer)
+<QueryClientProvider>        ← @tanstack/react-query (index.jsx)
+  <BrowserRouter>
+    <AuthProvider>           ← context/AuthContext.jsx
+      <App>                  ← App.jsx (route definitions)
+        <AuthLayout>         ← for /login, /register (centered card)
+        <MainLayout>         ← for all other pages (Navbar + content + Footer)
 ```
 
 #### Routing & Access Control
@@ -84,10 +85,10 @@ ERD defined in `ERD.mmd`. Key entities and relationships:
 ## Development Notes
 
 ### Auth & Security Conventions
-- JWT payload: `{ id, roleId, roleName }` — includes both for flexibility
-- Backend `authorize()` middleware checks **roleName strings**: `authorize("employee")`
+- JWT payload: `{ id, username, roleId }`
+- Backend `authorize()` middleware checks **roleId constants**: `authorize(ROLES.EMPLOYEE)` (from `server/src/constants/roles.js`)
 - Frontend role checks use **roleId constants** from `client/src/constants/roles.js`: `ROLES.EMPLOYEE = 1`, `ROLES.CUSTOMER = 2`
-- Middleware chain: `authenticate → authorize("role") → handler`
+- Middleware chain: `authenticate → authorize(ROLES.X) → handler`
 - User budget is **calculated** via `Transaction.sum("amount")`, not a stored field
 - Express 5 catches async rejections natively — no need for express-async-errors
 - Global error handler is last middleware in `server/src/index.js`
@@ -101,7 +102,18 @@ Registration has a special employee code flow (see `auth.service.js`):
 4. Entire operation (create user + mark code used) wrapped in a Sequelize transaction
 
 ### AuthContext (client/src/context/AuthContext.jsx)
-Currently stubbed with a `FAKE_USER` for development. Provides `user`, `login`, `logout`, and `switchRole` (dev-only toggle between employee/customer).
+Uses real JWT tokens for authentication. Decodes token from `localStorage` on mount. Provides `user`, `login`, `loginWithToken`, and `logout`.
+
+### React Query & API Layer (client/src/services/api.js)
+- **Custom hooks** wrap `useMutation` for all API calls: `useLogin`, `useRegister`, `useGenerateCode`
+- Hooks accept an `options` parameter (spread into `useMutation`) so components can pass `onSuccess`, `onError`, etc.
+- Use `useQuery` for GET requests (auto-fetch on mount), `useMutation` for POST/PUT/DELETE (triggered manually via `mutate()`)
+- Axios instance configured with JWT interceptor and error response handler
+- `authAPI` object kept for use in `AuthContext` only
+
+### Form Patterns
+- Form fields defined as **config arrays** and rendered via `.map()` (data-driven rendering)
+- Each field object: `{ id, label, name, type, value, setter, placeholder }`
 
 ### Frontend ID Conventions (QA Automation)
 - **Every** interactive and important element must have an `id` attribute
