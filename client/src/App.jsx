@@ -17,6 +17,7 @@ import BudgetPage from './pages/Budget/BudgetPage';
 import ManageLoansPage from './pages/ManageLoans/ManageLoansPage';
 import ManageCustomersPage from './pages/ManageCustomers/ManageCustomersPage';
 import ReportsPage from './pages/Reports/ReportsPage';
+import EmployeeCodesPage from './pages/EmployeeCodes/EmployeeCodesPage';
 import NotFoundPage from './pages/NotFound/NotFoundPage';
 
 export default function App() {
@@ -49,6 +50,7 @@ export default function App() {
             <Route path="/manage/loans" element={<ManageLoansPage />} />
             <Route path="/manage/customers" element={<ManageCustomersPage />} />
             <Route path="/reports" element={<ReportsPage />} />
+            <Route path="/employee-codes" element={<EmployeeCodesPage />} />
           </Route>
         </Route>
       </Route>

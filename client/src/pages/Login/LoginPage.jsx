@@ -1,11 +1,67 @@
-import PageHeader from '../../components/PageHeader/PageHeader';
-import Placeholder from '../../components/Placeholder/Placeholder';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { useLogin } from '../../services/api';
+import FormInput from '../../components/FormInput/FormInput';
+import Button from '../../components/Button/Button';
+import styles from './LoginPage.module.scss';
 
 export default function LoginPage() {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+
+  const { loginWithToken } = useAuth();
+  const navigate = useNavigate();
+
+  const { mutate, isPending, error } = useLogin({
+    onSuccess: (data) => {
+      loginWithToken(data.data.token);
+      navigate('/');
+    },
+  });
+
+  const formFields = [
+    { id: 'login-username-input', label: 'Username', name: 'username', value: username, setter: setUsername, placeholder: 'Enter your username' },
+    { id: 'login-password-input', label: 'Password', name: 'password', type: 'password', value: password, setter: setPassword, placeholder: 'Enter your password' },
+  ];
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (!username || !password) {
+      return;
+    }
+
+    mutate({ username, password });
+  };
+
   return (
     <section id="login-page">
-      <PageHeader id="login-page-header" title="Login" />
-      <Placeholder id="login-placeholder" pageName="Login" description="Sign in form will be implemented in Phase 3." />
+      <h2 className={styles.title}>Login</h2>
+      <form id="login-form" className={styles.form} onSubmit={handleSubmit}>
+        {formFields.map((field) => (
+          <FormInput
+            key={field.name}
+            id={field.id}
+            label={field.label}
+            name={field.name}
+            type={field.type}
+            value={field.value}
+            onChange={(e) => field.setter(e.target.value)}
+            placeholder={field.placeholder}
+          />
+        ))}
+        {error && <p id="login-error" className={styles.error}>{error.message}</p>}
+        <Button id="login-submit-btn" type="submit" disabled={isPending}>
+          {isPending ? 'Logging in...' : 'Login'}
+        </Button>
+      </form>
+      <p className={styles.footer}>
+        Don't have an account?{' '}
+        <Link id="login-register-link" to="/register" className={styles.link}>
+          Register
+        </Link>
+      </p>
     </section>
   );
 }
