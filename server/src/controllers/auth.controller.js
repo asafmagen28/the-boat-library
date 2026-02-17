@@ -18,7 +18,7 @@ export const login = async (req, res) => {
     throw error;
   }
 
-  const { user, roleName } = await loginUser({ username, password });
+  const { user } = await loginUser({ username, password });
   return res.status(200).json({ token: generateToken(user) });
 };
 
