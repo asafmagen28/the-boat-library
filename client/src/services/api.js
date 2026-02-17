@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { useMutation } from '@tanstack/react-query';
 
 const api = axios.create({
   baseURL: process.env.REACT_APP_API_URL || 'http://localhost:3001/api',
@@ -26,8 +27,24 @@ export const authAPI = {
     api.post('/auth/register', { username, password, employeeCode }),
 };
 
-export const employeeCodeAPI = {
-  generateCode: () => api.post('/employee-codes')
+export const useGenerateCode = () => {
+  return useMutation({
+      mutationFn: () => api.post('/employee-codes'),
+  })
+};
+
+export const useLogin = (options = {}) => {
+  return useMutation({
+    mutationFn: (credentials) => api.post('/auth/login', credentials),
+    ...options,
+  })
+};
+
+export const useRegister = (options = {}) => {
+  return useMutation({
+    mutationFn: (data) => api.post('/auth/register', data),
+    ...options,
+  })
 };
 
 export default api;
