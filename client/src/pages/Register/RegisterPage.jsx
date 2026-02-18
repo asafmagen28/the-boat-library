@@ -34,7 +34,8 @@ export default function RegisterPage() {
     e.preventDefault();
     setValidationError('');
 
-    if (!username || !password || !confirmPassword) {
+    const trimmedUsername = username.trim();
+    if (!trimmedUsername || !password || !confirmPassword) {
       setValidationError('Username, password, and confirm password are required');
       return;
     }
@@ -49,7 +50,7 @@ export default function RegisterPage() {
       return;
     }
 
-    mutate({ username, password, employeeCode: employeeCode || undefined });
+    mutate({ username: trimmedUsername, password, employeeCode: employeeCode || undefined });
   };
 
   const displayError = validationError || (error && error.message);
