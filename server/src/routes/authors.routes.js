@@ -2,20 +2,14 @@ import { Router } from "express";
 import authenticate from "../middlewares/authenticate.js";
 import authorize from "../middlewares/authorize.js";
 import { ROLES } from "../constants/roles.js";
+import { listAuthors, addAuthor, removeAuthor } from "../controllers/authors.controller.js";
 
 const router = Router();
 
-// Employee-only routes
-router.post("/", authenticate, authorize(ROLES.EMPLOYEE), (req, res) => {
-  res.status(501).json({ error: "Not implemented" });
-});
+router.get("/", authenticate, listAuthors);
 
-router.delete("/:id", authenticate, authorize(ROLES.EMPLOYEE), (req, res) => {
-  res.status(501).json({ error: "Not implemented" });
-});
+router.post("/", authenticate, authorize(ROLES.EMPLOYEE), addAuthor);
 
-router.get("/", authenticate, (req, res) => {
-  res.status(501).json({ error: "Not implemented" });
-});
+router.delete("/:id", authenticate, authorize(ROLES.EMPLOYEE), removeAuthor);
 
 export default router;
