@@ -32,6 +32,7 @@ export default function Navbar() {
         <NavLink id="navbar-logo" to="/" className={styles.logo} end>
           The Boat
         </NavLink>
+        <span id="navbar-username" className={styles.username}>{user?.username}</span>
         <button id="navbar-logout-btn" className={styles.logoutBtn} onClick={logout}>
           LogOut
         </button>
