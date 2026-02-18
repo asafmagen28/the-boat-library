@@ -1,0 +1,40 @@
+@use '../../styles/variables' as *;
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.customerItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-md;
+  background: $bg-white;
+  border: 1px solid $border-color;
+  border-radius: $radius-md;
+}
+
+.customerInfo {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.username {
+  font-size: $font-size-lg;
+  font-weight: 500;
+  color: $text-primary;
+}
+
+.date {
+  font-size: $font-size-sm;
+  color: $text-secondary;
+}
+
+.empty {
+  color: $text-muted;
+  text-align: center;
+  margin-top: $spacing-xl;
+}
