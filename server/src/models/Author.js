@@ -13,10 +13,16 @@ Author.init(
     firstName: {
       type: DataTypes.STRING,
       allowNull: false,
+      validate: {
+        notEmpty: { msg: "First name cannot be empty" },
+      },
     },
     surname: {
       type: DataTypes.STRING,
       allowNull: false,
+      validate: {
+        notEmpty: { msg: "Surname cannot be empty" },
+      },
     },
   },
   {

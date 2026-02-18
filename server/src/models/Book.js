@@ -14,6 +14,9 @@ Book.init(
     title: {
       type: DataTypes.STRING,
       allowNull: false,
+      validate: {
+        notEmpty: { msg: "Title cannot be empty" },
+      },
     },
     authorId: {
       type: DataTypes.INTEGER,
@@ -22,10 +25,16 @@ Book.init(
     price: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
+      validate: {
+        min: { args: [0], msg: "Price cannot be negative" },
+      },
     },
     fee: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
+      validate: {
+        min: { args: [0], msg: "Fee cannot be negative" },
+      },
     },
   },
   {
