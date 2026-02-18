@@ -12,7 +12,14 @@ const authenticate = (req, res, next) => {
   }
 
   try {
-    throw new AppError(message, 401);
+    req.user = jwt.verify(token, process.env.JWT_SECRET);
+    next();
+  } catch (error) {
+    console.warn("JWT auth failed:", error.name);
+    const message = error.name === "TokenExpiredError" ? "Token has expired"
+      : error.name === "JsonWebTokenError" ? "Token is invalid"
+      : "Authorization error";
+    return res.status(401).json({ error: message });
   }
 };
 
