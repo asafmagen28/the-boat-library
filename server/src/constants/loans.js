@@ -1,0 +1,1 @@
+export const BORROW_MAX_DAYS = 14;
