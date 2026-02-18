@@ -6,9 +6,8 @@ import { useAuthors, useAddAuthor, useDeleteAuthor, QUERY_KEYS } from '../../ser
 import PageHeader from '../../components/PageHeader/PageHeader';
 import Button from '../../components/Button/Button';
 import FormInput from '../../components/FormInput/FormInput';
+import { NAME_REGEX } from '../../constants/validation';
 import styles from './AuthorsPage.module.scss';
-
-const NAME_REGEX = /^[a-zA-Z\s'-]+$/;
 
 export default function AuthorsPage() {
   const { user } = useAuth();

@@ -15,6 +15,9 @@ User.init(
       type: DataTypes.STRING,
       allowNull: false,
       unique: true, // Assuming usernames should be unique
+      validate: {
+        notEmpty: { msg: "Username cannot be empty" },
+      },
     },
     password: {
       type: DataTypes.STRING,

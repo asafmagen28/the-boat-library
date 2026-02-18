@@ -19,6 +19,7 @@ export default function BooksPage() {
   const [price, setPrice] = useState('');
   const [fee, setFee] = useState('');
   const [numberOfCopies, setNumberOfCopies] = useState('1');
+  const [validationError, setValidationError] = useState('');
 
   const { data: books = [], isLoading, error } = useBooks();
   const { data: authors = [] } = useAuthors({ enabled: showForm });
@@ -57,13 +58,34 @@ export default function BooksPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!title || !authorId || !price || !fee) return;
+    setValidationError('');
+
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle || !authorId || !price || !fee) return;
+
+    const numPrice = Number(price);
+    const numFee = Number(fee);
+    const numCopies = Number(numberOfCopies) || 1;
+
+    if (numPrice < 0) {
+      setValidationError('Price cannot be negative');
+      return;
+    }
+    if (numFee < 0) {
+      setValidationError('Fee cannot be negative');
+      return;
+    }
+    if (!Number.isInteger(numCopies) || numCopies < 1) {
+      setValidationError('Number of copies must be a whole number greater than or equal to 1');
+      return;
+    }
+
     addBook.mutate({
-      title,
+      title: trimmedTitle,
       authorId: Number(authorId),
-      price: Number(price),
-      fee: Number(fee),
-      numberOfCopies: Number(numberOfCopies) || 1,
+      price: numPrice,
+      fee: numFee,
+      numberOfCopies: numCopies,
     });
   };
 
@@ -116,6 +138,7 @@ export default function BooksPage() {
               ))}
             </select>
           </div>
+          {validationError && <p id="add-book-validation-error" className={styles.error}>{validationError}</p>}
           {addBook.error && <p id="add-book-error" className={styles.error}>{addBook.error.message}</p>}
           <Button id="add-book-submit-btn" type="submit" disabled={addBook.isPending}>
             {addBook.isPending ? 'Adding...' : 'Add Book'}

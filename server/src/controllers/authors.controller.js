@@ -1,12 +1,11 @@
 import { getAllAuthors, createAuthor, deleteAuthor } from "../services/authors.service.js";
 import AppError from "../utils/AppError.js";
+import { NAME_REGEX } from "../constants/validation.js";
 
 export const listAuthors = async (req, res) => {
   const authors = await getAllAuthors();
   return res.json(authors);
 };
-
-const NAME_REGEX = /^[a-zA-Z\s'-]+$/;
 
 export const addAuthor = async (req, res) => {
   const firstName = req.body.firstName?.trim();
