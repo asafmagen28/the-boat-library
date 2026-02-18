@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { registerUser, loginUser } from "../services/auth.service.js";
+import AppError from "../utils/AppError.js";
 
 const generateToken = (user) => {
   return jwt.sign(
@@ -13,9 +14,7 @@ export const login = async (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
-    const error = new Error("Username and password are required");
-    error.status = 400;
-    throw error;
+    throw new AppError("Username and password are required", 400);
   }
 
   const { user } = await loginUser({ username, password });
@@ -25,10 +24,8 @@ export const login = async (req, res) => {
 export const register = async (req, res) => {
   const { username, password, employeeCode } = req.body;
 
-  if (!username || !password) {    
-    const error = new Error("Username and password are required");
-    error.status = 400;
-    throw error;
+  if (!username || !password) {
+    throw new AppError("Username and password are required", 400);
   }
 
   const { user } = await registerUser({ username, password, employeeCode });
