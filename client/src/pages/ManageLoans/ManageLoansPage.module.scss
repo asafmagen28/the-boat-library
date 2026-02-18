@@ -1,0 +1,40 @@
+@use '../../styles/variables' as *;
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.loanItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-md;
+  background: $bg-white;
+  border: 1px solid $border-color;
+  border-radius: $radius-md;
+}
+
+.loanInfo {
+  flex: 1;
+}
+
+.bookTitle {
+  font-size: $font-size-lg;
+  font-weight: 600;
+  color: $text-primary;
+  margin: 0 0 $spacing-xs 0;
+}
+
+.detail {
+  font-size: $font-size-sm;
+  color: $text-secondary;
+  margin: 0;
+}
+
+.empty {
+  color: $text-muted;
+  text-align: center;
+  margin-top: $spacing-xl;
+}

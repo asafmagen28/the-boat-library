@@ -1,11 +1,54 @@
+import { useQueryClient } from '@tanstack/react-query';
+import { useAllLoans, useReturnLoan, QUERY_KEYS } from '../../services/api';
 import PageHeader from '../../components/PageHeader/PageHeader';
-import Placeholder from '../../components/Placeholder/Placeholder';
+import Button from '../../components/Button/Button';
+import styles from './ManageLoansPage.module.scss';
 
 export default function ManageLoansPage() {
+  const queryClient = useQueryClient();
+  const { data: loans = [], isLoading, error } = useAllLoans();
+
+  const returnLoan = useReturnLoan({
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.loans });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.books });
+    },
+  });
+
+  if (isLoading) return <p>Loading loans...</p>;
+  if (error) return <p id="manage-loans-error">Error: {error.message}</p>;
+
   return (
     <section id="manage-loans-page">
       <PageHeader id="manage-loans-page-header" title="Manage Loans" subtitle="Process loans and returns" />
-      <Placeholder id="manage-loans-placeholder" pageName="Manage Loans" description="Loan management tools will be implemented in a future phase." />
+
+      {returnLoan.error && <p id="return-loan-error" className={styles.error}>{returnLoan.error.message}</p>}
+
+      <div className={styles.list}>
+        {loans.map((loan) => (
+          <div key={loan.id} id={`loan-item-${loan.id}`} className={styles.loanItem}>
+            <div className={styles.loanInfo}>
+              <h3 className={styles.bookTitle}>{loan.copy?.book?.title}</h3>
+              <p className={styles.detail}>
+                Author: {loan.copy?.book?.author?.firstName} {loan.copy?.book?.author?.surname}
+              </p>
+              <p className={styles.detail}>Borrower: {loan.borrower?.username}</p>
+              <p className={styles.detail}>Loan Date: {loan.loanDate}</p>
+              <p className={styles.detail}>Deadline: {loan.deadLineDate}</p>
+            </div>
+            <Button
+              id={`loan-return-btn-${loan.id}`}
+              variant="primary"
+              onClick={() => returnLoan.mutate(loan.id)}
+              disabled={returnLoan.isPending}
+            >
+              Return
+            </Button>
+          </div>
+        ))}
+      </div>
+
+      {loans.length === 0 && <p className={styles.empty}>No active loans.</p>}
     </section>
   );
 }
