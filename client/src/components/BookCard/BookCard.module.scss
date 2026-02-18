@@ -7,17 +7,11 @@
   padding: $spacing-md;
   box-shadow: $shadow-sm;
   transition: all 0.3s ease;
-  cursor: pointer;
 
   &:hover {
     box-shadow: $shadow-md;
     transform: translateY(-2px);
     border-color: $primary;
-  }
-
-  &:focus {
-    outline: 2px solid $primary;
-    outline-offset: 2px;
   }
 }
 
@@ -83,4 +77,12 @@
 .unavailable {
   background-color: rgba($text-muted, 0.1);
   color: $text-muted;
+}
+
+.actions {
+  display: flex;
+  gap: $spacing-sm;
+  margin-top: $spacing-md;
+  padding-top: $spacing-sm;
+  border-top: 1px solid $border-color;
 }
