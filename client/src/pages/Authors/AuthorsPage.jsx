@@ -8,6 +8,8 @@ import Button from '../../components/Button/Button';
 import FormInput from '../../components/FormInput/FormInput';
 import styles from './AuthorsPage.module.scss';
 
+const NAME_REGEX = /^[a-zA-Z\s'-]+$/;
+
 export default function AuthorsPage() {
   const { user } = useAuth();
   const isEmployee = user?.roleId === ROLES.EMPLOYEE;
@@ -15,6 +17,7 @@ export default function AuthorsPage() {
 
   const [firstName, setFirstName] = useState('');
   const [surname, setSurname] = useState('');
+  const [validationError, setValidationError] = useState('');
 
   const queryClient = useQueryClient();
   const { data: authors = [], isLoading, error } = useAuthors();
@@ -41,8 +44,19 @@ export default function AuthorsPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!firstName || !surname) return;
-    addAuthor.mutate({ firstName, surname });
+    setValidationError('');
+
+    const trimmedFirst = firstName.trim();
+    const trimmedSurname = surname.trim();
+
+    if (!trimmedFirst || !trimmedSurname) return;
+
+    if (!NAME_REGEX.test(trimmedFirst) || !NAME_REGEX.test(trimmedSurname)) {
+      setValidationError('Names must contain only letters, spaces, hyphens, or apostrophes');
+      return;
+    }
+
+    addAuthor.mutate({ firstName: trimmedFirst, surname: trimmedSurname });
   };
 
   if (isLoading) return <p>Loading authors...</p>;
@@ -77,6 +91,7 @@ export default function AuthorsPage() {
               placeholder={field.placeholder}
             />
           ))}
+          {validationError && <p id="add-author-validation-error" className={styles.error}>{validationError}</p>}
           {addAuthor.error && <p id="add-author-error" className={styles.error}>{addAuthor.error.message}</p>}
           <Button id="add-author-submit-btn" type="submit" disabled={addAuthor.isPending}>
             {addAuthor.isPending ? 'Adding...' : 'Add Author'}
