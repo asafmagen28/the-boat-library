@@ -1,0 +1,50 @@
+@use '../../styles/variables' as *;
+
+.toolbar {
+  margin-bottom: $spacing-lg;
+}
+
+.form {
+  max-width: 500px;
+  margin-bottom: $spacing-xl;
+  padding: $spacing-lg;
+  background: $bg-white;
+  border: 1px solid $border-color;
+  border-radius: $radius-md;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.error {
+  color: $danger;
+  font-size: $font-size-sm;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.authorItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-md;
+  background: $bg-white;
+  border: 1px solid $border-color;
+  border-radius: $radius-md;
+}
+
+.authorName {
+  font-size: $font-size-lg;
+  font-weight: 500;
+  color: $text-primary;
+}
+
+.empty {
+  color: $text-muted;
+  text-align: center;
+  margin-top: $spacing-xl;
+}
