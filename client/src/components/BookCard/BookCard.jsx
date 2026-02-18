@@ -1,58 +1,69 @@
 import styles from './BookCard.module.scss';
+import Button from '../Button/Button';
 
-function BookCard({ book, onClick }) {
-  // Destructure book properties with defaults for skeleton structure
+function BookCard({ book, onBorrow, onDelete, canBorrow, canDelete }) {
   const {
     title = 'Unknown Title',
-    isbn = 'N/A',
-    publicationYear,
-    Author,
+    author,
+    price = 0,
+    fee = 0,
     availableCopies = 0
   } = book || {};
 
-  // Format author name from Author object (firstName + lastName)
-  const authorName = Author
-    ? `${Author.firstName} ${Author.lastName}`.trim()
+  const authorName = author
+    ? `${author.firstName} ${author.surname}`.trim()
     : 'Unknown Author';
 
-  // Determine availability status for styling
   const isAvailable = availableCopies > 0;
 
   return (
     <div
       id={book?.id ? `book-card-${book.id}` : undefined}
       className={styles.bookCard}
-      onClick={onClick}
-      role={onClick ? 'button' : undefined}
-      tabIndex={onClick ? 0 : undefined}
     >
-      {/* Book Title - Main heading */}
       <h3 className={styles.title}>{title}</h3>
 
-      {/* Author Information */}
       <p className={styles.author}>by {authorName}</p>
 
-      {/* Book Details Section */}
       <div className={styles.details}>
         <div className={styles.detailItem}>
-          <span className={styles.label}>ISBN:</span>
-          <span className={styles.value}>{isbn}</span>
+          <span className={styles.label}>Price:</span>
+          <span className={styles.value}>${Number(price).toFixed(2)}</span>
         </div>
-
-        {publicationYear && (
-          <div className={styles.detailItem}>
-            <span className={styles.label}>Published:</span>
-            <span className={styles.value}>{publicationYear}</span>
-          </div>
-        )}
+        <div className={styles.detailItem}>
+          <span className={styles.label}>Fee:</span>
+          <span className={styles.value}>${Number(fee).toFixed(2)}</span>
+        </div>
       </div>
 
-      {/* Availability Badge */}
       <div className={styles.availability}>
         <span className={`${styles.badge} ${isAvailable ? styles.available : styles.unavailable}`}>
           {isAvailable ? `${availableCopies} available` : 'Not available'}
         </span>
       </div>
+
+      {(canBorrow || canDelete) && (
+        <div className={styles.actions}>
+          {canBorrow && isAvailable && (
+            <Button
+              id={`book-borrow-btn-${book.id}`}
+              variant="primary"
+              onClick={() => onBorrow(book.id)}
+            >
+              Borrow
+            </Button>
+          )}
+          {canDelete && (
+            <Button
+              id={`book-delete-btn-${book.id}`}
+              variant="danger"
+              onClick={() => onDelete(book.id)}
+            >
+              Delete
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
