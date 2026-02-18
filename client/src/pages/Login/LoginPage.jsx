@@ -28,11 +28,12 @@ export default function LoginPage() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!username || !password) {
+    const trimmedUsername = username.trim();
+    if (!trimmedUsername || !password) {
       return;
     }
 
-    mutate({ username, password });
+    mutate({ username: trimmedUsername, password });
   };
 
   return (

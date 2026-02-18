@@ -11,7 +11,8 @@ const generateToken = (user) => {
 };
 
 export const login = async (req, res) => {
-  const { username, password } = req.body;
+  const username = req.body.username?.trim();
+  const { password } = req.body;
 
   if (!username || !password) {
     throw new AppError("Username and password are required", 400);
@@ -22,7 +23,8 @@ export const login = async (req, res) => {
 };
 
 export const register = async (req, res) => {
-  const { username, password, employeeCode } = req.body;
+  const username = req.body.username?.trim();
+  const { password, employeeCode } = req.body;
 
   if (!username || !password) {
     throw new AppError("Username and password are required", 400);
