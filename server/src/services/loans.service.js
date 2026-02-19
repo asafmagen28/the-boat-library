@@ -2,8 +2,14 @@ import { sequelize, Loan, Copy, Book, Author, Transaction, User } from "../model
 import { getStatus, getTransactionType } from "../utils/lookupCache.js";
 import { BORROW_MAX_DAYS } from "../constants/loans.js";
 import AppError from "../utils/AppError.js";
+import { getUserBudget } from "./users.service.js";
 
 export const createLoan = async ({ bookId, borrowerId }) => {
+  const budget = await getUserBudget(borrowerId);
+  const book = await Book.findByPk(bookId);
+  if (!book) throw new AppError("Book not found", 404);
+  if (budget < book.price) throw new AppError("Insufficient budget", 400);
+
   const availableStatus = await getStatus("available");
   const borrowedStatus = await getStatus("borrowed");
 
