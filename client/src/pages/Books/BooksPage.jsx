@@ -2,11 +2,15 @@ import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../context/AuthContext';
 import { ROLES } from '../../constants/roles';
-import { useBooks, useAddBook, useDeleteBook, useBorrowBook, useAuthors, QUERY_KEYS } from '../../services/api';
+import { QUERY_KEYS } from '../../services/api';
+import { useBooks, useAddBook, useDeleteBook } from '../../services/books.api';
+import { useBorrowBook } from '../../services/loans.api';
+import { useAuthors } from '../../services/authors.api';
 import PageHeader from '../../components/PageHeader/PageHeader';
 import BookCard from '../../components/BookCard/BookCard';
 import Button from '../../components/Button/Button';
 import FormInput from '../../components/FormInput/FormInput';
+import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
 import styles from './BooksPage.module.scss';
 
 export default function BooksPage() {
@@ -20,13 +24,20 @@ export default function BooksPage() {
   const [fee, setFee] = useState('');
   const [numberOfCopies, setNumberOfCopies] = useState('1');
   const [validationError, setValidationError] = useState('');
+  const [activeModal, setActiveModal] = useState(null);
+  const closeModal = () => setActiveModal(null);
 
   const { data: books = [], isLoading, error } = useBooks();
   const { data: authors = [] } = useAuthors({ enabled: showForm });
 
   const addBook = useAddBook({
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.books });
+    onSuccess: (response) => {
+      const newBook = response.data;
+      const author = authors.find((a) => a.id === newBook.authorId);
+      queryClient.setQueryData(QUERY_KEYS.books, (old = []) => [
+        ...old,
+        { ...newBook, author, availableCopies: Number(numberOfCopies) || 1 },
+      ]);
       setTitle('');
       setAuthorId('');
       setPrice('');
@@ -37,17 +48,45 @@ export default function BooksPage() {
   });
 
   const deleteBook = useDeleteBook({
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.books });
+    onSuccess: (_response, deletedId) => {
+      queryClient.setQueryData(QUERY_KEYS.books, (old = []) =>
+        old.filter((book) => book.id !== deletedId)
+      );
+      closeModal();
     },
   });
 
   const borrowBook = useBorrowBook({
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.books });
+    onSuccess: (_response, variables) => {
+      queryClient.setQueryData(QUERY_KEYS.books, (old = []) =>
+        old.map((book) =>
+          book.id === variables.bookId
+            ? { ...book, availableCopies: book.availableCopies - 1 }
+            : book
+        )
+      );
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.myLoans });
+      closeModal();
     },
   });
+
+  const MODALS = {
+    deleteBook: {
+      id: 'delete-book-modal',
+      title: 'Delete Book',
+      confirmLabel: 'Delete',
+      getMessage: (book) => `Are you sure you want to delete "${book.title}"?`,
+      onConfirm: (book) => deleteBook.mutate(book.id),
+    },
+    borrowBook: {
+      id: 'borrow-book-modal',
+      title: 'Borrow Book',
+      confirmLabel: 'Borrow',
+      confirmVariant: 'primary',
+      getMessage: (book) => `Are you sure you want to borrow "${book.title}"?`,
+      onConfirm: (book) => borrowBook.mutate({ bookId: book.id }),
+    },
+  };
 
   const formFields = [
     { id: 'add-book-title-input', label: 'Title', name: 'title', value: title, setter: setTitle, placeholder: 'Book title' },
@@ -156,13 +195,26 @@ export default function BooksPage() {
             book={book}
             canBorrow={true}
             canDelete={isEmployee}
-            onBorrow={(id) => borrowBook.mutate({ bookId: id })}
-            onDelete={(id) => deleteBook.mutate(id)}
+            onBorrow={(id) => setActiveModal({ type: 'borrowBook', item: books.find((b) => b.id === id) })}
+            onDelete={(id) => setActiveModal({ type: 'deleteBook', item: books.find((b) => b.id === id) })}
           />
         ))}
       </div>
 
       {books.length === 0 && <p className={styles.empty}>No books in the catalog yet.</p>}
+
+      {activeModal && (
+        <ConfirmModal
+          id={MODALS[activeModal.type].id}
+          isOpen={true}
+          title={MODALS[activeModal.type].title}
+          message={MODALS[activeModal.type].getMessage(activeModal.item)}
+          confirmLabel={MODALS[activeModal.type].confirmLabel}
+          confirmVariant={MODALS[activeModal.type].confirmVariant}
+          onConfirm={() => MODALS[activeModal.type].onConfirm(activeModal.item)}
+          onCancel={closeModal}
+        />
+      )}
     </section>
   );
 }
