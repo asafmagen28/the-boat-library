@@ -2,7 +2,8 @@ import bcrypt from "bcryptjs";
 import crypto from "node:crypto";
 import { EmployeeCode } from "../models/index.js";
 
-const CODE_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+const CODE_EXPIRY_DAYS = Number(process.env.EMPLOYEE_CODE_EXPIRY_DAYS) || 7;
+const CODE_EXPIRY_MS = CODE_EXPIRY_DAYS * 24 * 60 * 60 * 1000;
 
 export const generateEmployeeCode = async ({ createdById }) => {
     const generatedCode = crypto.randomBytes(16).toString("hex");
