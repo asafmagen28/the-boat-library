@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 
 export const QUERY_KEYS = {
   books: ['books'],
@@ -53,99 +53,6 @@ export const useRegister = (options = {}) => {
     mutationFn: (data) => api.post('/auth/register', data),
     ...options,
   })
-};
-
-// Authors
-export const useAuthors = (options = {}) => {
-  return useQuery({
-    queryKey: QUERY_KEYS.authors,
-    queryFn: () => api.get('/authors').then((res) => res.data),
-    ...options,
-  });
-};
-
-export const useAddAuthor = (options = {}) => {
-  return useMutation({
-    mutationFn: (data) => api.post('/authors', data),
-    ...options,
-  });
-};
-
-export const useDeleteAuthor = (options = {}) => {
-  return useMutation({
-    mutationFn: (id) => api.delete(`/authors/${id}`),
-    ...options,
-  });
-};
-
-// Books
-export const useBooks = (options = {}) => {
-  return useQuery({
-    queryKey: QUERY_KEYS.books,
-    queryFn: () => api.get('/books').then((res) => res.data),
-    ...options,
-  });
-};
-
-export const useAddBook = (options = {}) => {
-  return useMutation({
-    mutationFn: (data) => api.post('/books', data),
-    ...options,
-  });
-};
-
-export const useDeleteBook = (options = {}) => {
-  return useMutation({
-    mutationFn: (id) => api.delete(`/books/${id}`),
-    ...options,
-  });
-};
-
-// Loans
-export const useAllLoans = (options = {}) => {
-  return useQuery({
-    queryKey: QUERY_KEYS.loans,
-    queryFn: () => api.get('/loans').then((res) => res.data),
-    ...options,
-  });
-};
-
-export const useMyLoans = (options = {}) => {
-  return useQuery({
-    queryKey: QUERY_KEYS.myLoans,
-    queryFn: () => api.get('/loans/my').then((res) => res.data),
-    ...options,
-  });
-};
-
-export const useBorrowBook = (options = {}) => {
-  return useMutation({
-    mutationFn: (data) => api.post('/loans', data),
-    ...options,
-  });
-};
-
-export const useReturnLoan = (options = {}) => {
-  return useMutation({
-    mutationFn: (id) => api.patch(`/loans/${id}/return`),
-    ...options,
-  });
-};
-
-// Users
-export const useCustomers = (options = {}) => {
-  return useQuery({
-    queryKey: QUERY_KEYS.customers,
-    queryFn: () => api.get('/users').then((res) => res.data),
-    ...options,
-  });
-};
-
-export const useDeleteUser = (options = {}) => {
-  return useMutation({
-    mutationFn: (id) => api.delete(`/users/${id}`),
-    ...options,
-  });
 };
 
 export default api;
