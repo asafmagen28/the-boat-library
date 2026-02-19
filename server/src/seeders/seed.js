@@ -13,6 +13,7 @@ async function seed() {
     console.log("Statuses seeded");
 
     await TransactionType.findOrCreate({ where: { type: "borrow_charge" } });
+    await TransactionType.findOrCreate({ where: { type: "deposit" } });
     console.log("TransactionTypes seeded");
 
     console.log("Seed complete");
