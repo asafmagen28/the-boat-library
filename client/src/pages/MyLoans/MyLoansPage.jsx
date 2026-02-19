@@ -1,4 +1,4 @@
-import { useMyLoans } from '../../services/api';
+import { useMyLoans } from '../../services/loans.api';
 import PageHeader from '../../components/PageHeader/PageHeader';
 import styles from './MyLoansPage.module.scss';
 
