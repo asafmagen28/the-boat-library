@@ -1,17 +1,24 @@
+import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useAllLoans, useReturnLoan, QUERY_KEYS } from '../../services/api';
+import { QUERY_KEYS } from '../../services/api';
+import { useAllLoans, useReturnLoan } from '../../services/loans.api';
 import PageHeader from '../../components/PageHeader/PageHeader';
 import Button from '../../components/Button/Button';
+import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
 import styles from './ManageLoansPage.module.scss';
 
 export default function ManageLoansPage() {
   const queryClient = useQueryClient();
+  const [loanToReturn, setLoanToReturn] = useState(null);
   const { data: loans = [], isLoading, error } = useAllLoans();
 
   const returnLoan = useReturnLoan({
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.loans });
+    onSuccess: (_response, returnedLoanId) => {
+      queryClient.setQueryData(QUERY_KEYS.loans, (old = []) =>
+        old.filter((loan) => loan.id !== returnedLoanId)
+      );
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.books });
+      setLoanToReturn(null);
     },
   });
 
@@ -39,7 +46,7 @@ export default function ManageLoansPage() {
             <Button
               id={`loan-return-btn-${loan.id}`}
               variant="primary"
-              onClick={() => returnLoan.mutate(loan.id)}
+              onClick={() => setLoanToReturn(loan)}
               disabled={returnLoan.isPending}
             >
               Return
@@ -49,6 +56,17 @@ export default function ManageLoansPage() {
       </div>
 
       {loans.length === 0 && <p className={styles.empty}>No active loans.</p>}
+
+      <ConfirmModal
+        id="return-loan-modal"
+        isOpen={!!loanToReturn}
+        title="Return Book"
+        message={`Are you sure you want to return "${loanToReturn?.copy?.book?.title}" borrowed by ${loanToReturn?.borrower?.username}?`}
+        confirmLabel="Return"
+        confirmVariant="primary"
+        onConfirm={() => returnLoan.mutate(loanToReturn.id)}
+        onCancel={() => setLoanToReturn(null)}
+      />
     </section>
   );
 }
