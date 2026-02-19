@@ -68,6 +68,7 @@ export default function BooksPage() {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.myLoans });
       closeModal();
     },
+    onError: closeModal,
   });
 
   const MODALS = {
