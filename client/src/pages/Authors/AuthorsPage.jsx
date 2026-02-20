@@ -53,11 +53,15 @@ export default function AuthorsPage() {
   const handleSubmit = (e) => {
     e.preventDefault();
     setValidationError('');
+    addAuthor.reset();
 
     const trimmedFirst = firstName.trim();
     const trimmedSurname = surname.trim();
 
-    if (!trimmedFirst || !trimmedSurname) return;
+    if (!trimmedFirst || !trimmedSurname) {
+      setValidationError('Please fill all required fields');
+      return;
+    }
 
     if (!NAME_REGEX.test(trimmedFirst) || !NAME_REGEX.test(trimmedSurname)) {
       setValidationError('Names must contain only letters, spaces, hyphens, or apostrophes');
@@ -79,7 +83,7 @@ export default function AuthorsPage() {
           <Button
             id="toggle-add-author-btn"
             variant={showForm ? 'outline' : 'primary'}
-            onClick={() => setShowForm(!showForm)}
+            onClick={() => { setShowForm(!showForm); setValidationError(''); }}
           >
             {showForm ? 'Cancel' : 'Add Author'}
           </Button>
