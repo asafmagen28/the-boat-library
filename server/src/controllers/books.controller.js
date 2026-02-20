@@ -22,6 +22,10 @@ export const addBook = async (req, res) => {
     throw new AppError("Fee cannot be negative", 400);
   }
 
+  if (Number(fee) > Number(price)) {
+    throw new AppError("Fee cannot be greater than the price", 400);
+  }
+
   if (numberOfCopies != null && (!Number.isInteger(Number(numberOfCopies)) || Number(numberOfCopies) < 1)) {
     throw new AppError("Number of copies must be a whole number greater than or equal to 1", 400);
   }

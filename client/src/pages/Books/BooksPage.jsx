@@ -99,9 +99,13 @@ export default function BooksPage() {
   const handleSubmit = (e) => {
     e.preventDefault();
     setValidationError('');
+    addBook.reset();
 
     const trimmedTitle = title.trim();
-    if (!trimmedTitle || !authorId || !price || !fee) return;
+    if (!trimmedTitle || !authorId || !price || !fee) {
+      setValidationError('Please fill all required fields');
+      return;
+    }
 
     const numPrice = Number(price);
     const numFee = Number(fee);
@@ -113,6 +117,10 @@ export default function BooksPage() {
     }
     if (numFee < 0) {
       setValidationError('Fee cannot be negative');
+      return;
+    }
+    if (numFee > numPrice) {
+      setValidationError('Fee cannot be greater than the price');
       return;
     }
     if (!Number.isInteger(numCopies) || numCopies < 1) {
@@ -141,7 +149,7 @@ export default function BooksPage() {
           <Button
             id="toggle-add-book-btn"
             variant={showForm ? 'outline' : 'primary'}
-            onClick={() => setShowForm(!showForm)}
+            onClick={() => { setShowForm(!showForm); setValidationError(''); }}
           >
             {showForm ? 'Cancel' : 'Add Book'}
           </Button>
