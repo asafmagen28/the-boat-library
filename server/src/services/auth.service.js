@@ -28,13 +28,12 @@ export const registerUser = async ({ username, password, employeeCode }) => {
 
   if (employeeCode) {
     // Bcrypt hashes can't be queried by value, so we fetch available codes
-    // and compare each one. Limit prevents loading too many rows.
+    // and compare each one.
     const availableEmployeeCodes = await EmployeeCode.findAll({
       where: {
         isUsed: false,
         expiresAt: { [Op.gt]: new Date() },
       },
-      limit: 100,
     });
 
     for (const code of availableEmployeeCodes) {
