@@ -9,11 +9,12 @@ import styles from './LoginPage.module.scss';
 export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [validationError, setValidationError] = useState('');
 
   const { loginWithToken } = useAuth();
   const navigate = useNavigate();
 
-  const { mutate, isPending, error } = useLogin({
+  const { mutate, isPending, error, reset } = useLogin({
     onSuccess: (data) => {
       loginWithToken(data.data.token);
       navigate('/');
@@ -27,9 +28,12 @@ export default function LoginPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setValidationError('');
+    reset();
 
     const trimmedUsername = username.trim();
     if (!trimmedUsername || !password) {
+      setValidationError('Please fill all required fields');
       return;
     }
 
@@ -52,6 +56,7 @@ export default function LoginPage() {
             placeholder={field.placeholder}
           />
         ))}
+        {validationError && <p id="login-validation-error" className={styles.error}>{validationError}</p>}
         {error && <p id="login-error" className={styles.error}>{error.message}</p>}
         <Button id="login-submit-btn" type="submit" disabled={isPending}>
           {isPending ? 'Logging in...' : 'Login'}

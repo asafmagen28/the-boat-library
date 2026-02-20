@@ -16,7 +16,7 @@ export default function RegisterPage() {
   const { loginWithToken } = useAuth();
   const navigate = useNavigate();
 
-  const { mutate, isPending, error } = useRegister({
+  const { mutate, isPending, error, reset } = useRegister({
     onSuccess: (data) => {
       loginWithToken(data.data.token);
       navigate('/');
@@ -33,6 +33,7 @@ export default function RegisterPage() {
   const handleSubmit = (e) => {
     e.preventDefault();
     setValidationError('');
+    reset();
 
     const trimmedUsername = username.trim();
     if (!trimmedUsername || !password || !confirmPassword) {
