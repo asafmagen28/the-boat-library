@@ -1,5 +1,6 @@
 import { getAllBooks, createBook, deleteBook } from "../services/books.service.js";
 import AppError from "../utils/AppError.js";
+import { parsePositiveInt, parseNumber } from "../utils/validation.js";
 
 export const listBooks = async (req, res) => {
   const books = await getAllBooks();
@@ -7,22 +8,26 @@ export const listBooks = async (req, res) => {
 };
 
 export const addBook = async (req, res) => {
-  const { authorId, price, fee, numberOfCopies } = req.body;
   const title = req.body.title?.trim();
+  const { numberOfCopies } = req.body;
 
-  if (!title || !authorId || price == null || fee == null) {
+  if (!title || req.body.authorId == null || req.body.price == null || req.body.fee == null) {
     throw new AppError("title, authorId, price, and fee are required", 400);
   }
 
-  if (Number(price) < 0) {
+  const authorId = parsePositiveInt(req.body.authorId, "authorId");
+  const price = parseNumber(req.body.price, "price");
+  const fee = parseNumber(req.body.fee, "fee");
+
+  if (price < 0) {
     throw new AppError("Price cannot be negative", 400);
   }
 
-  if (Number(fee) < 0) {
+  if (fee < 0) {
     throw new AppError("Fee cannot be negative", 400);
   }
 
-  if (Number(fee) > Number(price)) {
+  if (fee > price) {
     throw new AppError("Fee cannot be greater than the price", 400);
   }
 
@@ -41,6 +46,7 @@ export const addBook = async (req, res) => {
 };
 
 export const removeBook = async (req, res) => {
-  const book = await deleteBook(req.params.id);
+  const id = parsePositiveInt(req.params.id);
+  const book = await deleteBook(id);
   return res.json(book);
 };
