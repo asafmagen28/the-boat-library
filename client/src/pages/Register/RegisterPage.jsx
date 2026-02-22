@@ -36,12 +36,12 @@ export default function RegisterPage() {
     reset();
 
     const trimmedUsername = username.trim();
-    if (!trimmedUsername || !password || !confirmPassword) {
+    if (!trimmedUsername || !password.trim() || !confirmPassword.trim()) {
       setValidationError('Username, password, and confirm password are required');
       return;
     }
 
-    if (password.length < 6) {
+    if (password.trim().length < 6) {
       setValidationError('Password must be at least 6 characters');
       return;
     }
@@ -51,7 +51,7 @@ export default function RegisterPage() {
       return;
     }
 
-    mutate({ username: trimmedUsername, password, employeeCode: employeeCode || undefined });
+    mutate({ username: trimmedUsername, password, employeeCode: employeeCode.trim() || undefined });
   };
 
   const displayError = validationError || (error && error.message);
