@@ -1,6 +1,7 @@
 import { getAllAuthors, createAuthor, deleteAuthor } from "../services/authors.service.js";
 import AppError from "../utils/AppError.js";
 import { NAME_REGEX } from "../constants/validation.js";
+import { parsePositiveInt } from "../utils/validation.js";
 
 export const listAuthors = async (req, res) => {
   const authors = await getAllAuthors();
@@ -28,6 +29,7 @@ export const addAuthor = async (req, res) => {
 };
 
 export const removeAuthor = async (req, res) => {
-  const author = await deleteAuthor(req.params.id);
+  const id = parsePositiveInt(req.params.id);
+  const author = await deleteAuthor(id);
   return res.json(author);
 };
