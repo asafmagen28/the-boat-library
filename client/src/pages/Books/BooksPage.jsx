@@ -102,7 +102,7 @@ export default function BooksPage() {
     addBook.reset();
 
     const trimmedTitle = title.trim();
-    if (!trimmedTitle || !authorId || !price || !fee) {
+    if (!trimmedTitle || !authorId || price === '' || fee === '') {
       setValidationError('Please fill all required fields');
       return;
     }
