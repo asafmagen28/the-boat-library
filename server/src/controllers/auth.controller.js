@@ -14,7 +14,7 @@ export const login = async (req, res) => {
   const username = req.body.username?.trim();
   const { password } = req.body;
 
-  if (!username || !password) {
+  if (!username || !password?.trim()) {
     throw new AppError("Username and password are required", 400);
   }
 
@@ -26,7 +26,7 @@ export const register = async (req, res) => {
   const username = req.body.username?.trim();
   const { password, employeeCode } = req.body;
 
-  if (!username || !password) {
+  if (!username || !password?.trim()) {
     throw new AppError("Username and password are required", 400);
   }
 

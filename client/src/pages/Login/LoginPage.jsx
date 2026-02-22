@@ -32,7 +32,7 @@ export default function LoginPage() {
     reset();
 
     const trimmedUsername = username.trim();
-    if (!trimmedUsername || !password) {
+    if (!trimmedUsername || !password.trim()) {
       setValidationError('Please fill all required fields');
       return;
     }
