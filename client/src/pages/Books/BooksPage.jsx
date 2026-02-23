@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
@@ -20,14 +21,13 @@ export default function BooksPage() {
   const isEmployee = user?.roleId === ROLES.EMPLOYEE;
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
-  const [title, setTitle] = useState('');
-  const [authorId, setAuthorId] = useState('');
-  const [price, setPrice] = useState('');
-  const [fee, setFee] = useState('');
-  const [numberOfCopies, setNumberOfCopies] = useState('1');
-  const [validationError, setValidationError] = useState('');
   const [activeModal, setActiveModal] = useState(null);
   const closeModal = () => setActiveModal(null);
+
+  const { register, handleSubmit, watch, reset: resetForm, getValues, formState: { errors } } = useForm({
+    mode: 'onBlur',
+    defaultValues: { numberOfCopies: '1' },
+  });
 
   const { data: books = [], isLoading, error } = useBooks();
   const { data: authors = [] } = useAuthors({ enabled: showForm });
@@ -38,13 +38,9 @@ export default function BooksPage() {
       const author = authors.find((a) => a.id === newBook.authorId);
       queryClient.setQueryData(QUERY_KEYS.books, (old = []) => [
         ...old,
-        { ...newBook, author, availableCopies: Number(numberOfCopies) || 1 },
+        { ...newBook, author, availableCopies: Number(getValues('numberOfCopies')) || 1 },
       ]);
-      setTitle('');
-      setAuthorId('');
-      setPrice('');
-      setFee('');
-      setNumberOfCopies('1');
+      resetForm();
       setShowForm(false);
     },
   });
@@ -100,51 +96,49 @@ export default function BooksPage() {
     },
   };
 
+  const validationRules = {
+    title: {
+      required: 'Title is required',
+      validate: { notEmpty: (v) => v.trim() !== '' || 'Title cannot be empty' },
+    },
+    price: {
+      required: 'Price is required',
+      min: { value: 0, message: 'Price cannot be negative' },
+    },
+    fee: {
+      required: 'Fee is required',
+      min: { value: 0, message: 'Fee cannot be negative' },
+      validate: {
+        notGreaterThanPrice: (v) => Number(v) <= Number(watch('price')) || 'Fee cannot be greater than the price',
+      },
+    },
+    numberOfCopies: {
+      required: 'Number of copies is required',
+      min: { value: 1, message: 'Must be at least 1' },
+      validate: {
+        integer: (v) => Number.isInteger(Number(v)) || 'Must be a whole number',
+      },
+    },
+    authorId: {
+      required: 'Please select an author',
+    },
+  };
+
   const formFields = [
-    { id: 'add-book-title-input', label: 'Title', name: 'title', value: title, setter: setTitle, placeholder: 'Book title' },
-    { id: 'add-book-price-input', label: 'Price', name: 'price', type: 'number', value: price, setter: setPrice, placeholder: '0.00' },
-    { id: 'add-book-fee-input', label: 'Fee', name: 'fee', type: 'number', value: fee, setter: setFee, placeholder: '0.00' },
-    { id: 'add-book-copies-input', label: 'Number of Copies', name: 'numberOfCopies', type: 'number', value: numberOfCopies, setter: setNumberOfCopies, placeholder: '1' },
+    { id: 'add-book-title-input', label: 'Title', name: 'title', placeholder: 'Book title' },
+    { id: 'add-book-price-input', label: 'Price', name: 'price', type: 'number', placeholder: '0.00' },
+    { id: 'add-book-fee-input', label: 'Fee', name: 'fee', type: 'number', placeholder: '0.00' },
+    { id: 'add-book-copies-input', label: 'Number of Copies', name: 'numberOfCopies', type: 'number', placeholder: '1' },
   ];
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setValidationError('');
+  const onSubmit = (data) => {
     addBook.reset();
-
-    const trimmedTitle = title.trim();
-    if (!trimmedTitle || !authorId || price === '' || fee === '') {
-      setValidationError('Please fill all required fields');
-      return;
-    }
-
-    const numPrice = Number(price);
-    const numFee = Number(fee);
-    const numCopies = Number(numberOfCopies) || 1;
-
-    if (numPrice < 0) {
-      setValidationError('Price cannot be negative');
-      return;
-    }
-    if (numFee < 0) {
-      setValidationError('Fee cannot be negative');
-      return;
-    }
-    if (numFee > numPrice) {
-      setValidationError('Fee cannot be greater than the price');
-      return;
-    }
-    if (!Number.isInteger(numCopies) || numCopies < 1) {
-      setValidationError('Number of copies must be a whole number greater than or equal to 1');
-      return;
-    }
-
     addBook.mutate({
-      title: trimmedTitle,
-      authorId: Number(authorId),
-      price: numPrice,
-      fee: numFee,
-      numberOfCopies: numCopies,
+      title: data.title.trim(),
+      authorId: Number(data.authorId),
+      price: Number(data.price),
+      fee: Number(data.fee),
+      numberOfCopies: Number(data.numberOfCopies),
     });
   };
 
@@ -160,7 +154,7 @@ export default function BooksPage() {
           <Button
             id="toggle-add-book-btn"
             variant={showForm ? 'outline' : 'primary'}
-            onClick={() => { setShowForm(!showForm); setValidationError(''); }}
+            onClick={() => { setShowForm(!showForm); resetForm(); }}
           >
             {showForm ? 'Cancel' : 'Add Book'}
           </Button>
@@ -168,26 +162,24 @@ export default function BooksPage() {
       )}
 
       {showForm && (
-        <form id="add-book-form" className={styles.form} onSubmit={handleSubmit}>
+        <form id="add-book-form" className={styles.form} onSubmit={handleSubmit(onSubmit)}>
           {formFields.map((field) => (
             <FormInput
               key={field.name}
               id={field.id}
               label={field.label}
-              name={field.name}
               type={field.type}
-              value={field.value}
-              onChange={(e) => field.setter(e.target.value)}
               placeholder={field.placeholder}
+              error={errors[field.name]?.message}
+              {...register(field.name, validationRules[field.name])}
             />
           ))}
           <div className={styles.selectGroup}>
             <label htmlFor="add-book-author-select">Author</label>
             <select
               id="add-book-author-select"
-              value={authorId}
-              onChange={(e) => setAuthorId(e.target.value)}
               className={styles.select}
+              {...register('authorId', validationRules.authorId)}
             >
               <option value="">Select an author</option>
               {authors.map((a) => (
@@ -196,8 +188,8 @@ export default function BooksPage() {
                 </option>
               ))}
             </select>
+            {errors.authorId && <span className={styles.error}>{errors.authorId.message}</span>}
           </div>
-          {validationError && <p id="add-book-validation-error" className={styles.error}>{validationError}</p>}
           {addBook.error && <p id="add-book-error" className={styles.error}>{addBook.error.message}</p>}
           <Button id="add-book-submit-btn" type="submit" disabled={addBook.isPending}>
             {addBook.isPending ? 'Adding...' : 'Add Book'}

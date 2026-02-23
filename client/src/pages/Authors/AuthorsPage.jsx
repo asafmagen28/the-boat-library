@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
@@ -16,11 +17,9 @@ export default function AuthorsPage() {
   const { user } = useAuth();
   const isEmployee = user?.roleId === ROLES.EMPLOYEE;
   const [showForm, setShowForm] = useState(false);
-
-  const [firstName, setFirstName] = useState('');
-  const [surname, setSurname] = useState('');
-  const [validationError, setValidationError] = useState('');
   const [authorToDelete, setAuthorToDelete] = useState(null);
+
+  const { register, handleSubmit, reset: resetForm, formState: { errors } } = useForm({ mode: 'onBlur' });
 
   const { showToast } = useToast();
   const queryClient = useQueryClient();
@@ -32,8 +31,7 @@ export default function AuthorsPage() {
         ...old,
         response.data,
       ]);
-      setFirstName('');
-      setSurname('');
+      resetForm();
       setShowForm(false);
     },
   });
@@ -53,29 +51,21 @@ export default function AuthorsPage() {
   });
 
   const formFields = [
-    { id: 'add-author-firstname-input', label: 'First Name', name: 'firstName', value: firstName, setter: setFirstName, placeholder: 'First name' },
-    { id: 'add-author-surname-input', label: 'Surname', name: 'surname', value: surname, setter: setSurname, placeholder: 'Surname' },
+    { id: 'add-author-firstname-input', label: 'First Name', name: 'firstName', placeholder: 'First name' },
+    { id: 'add-author-surname-input', label: 'Surname', name: 'surname', placeholder: 'Surname' },
   ];
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setValidationError('');
+  const nameRules = {
+    required: 'This field is required',
+    validate: {
+      notEmpty: (v) => v.trim() !== '' || 'This field cannot be empty',
+      pattern: (v) => NAME_REGEX.test(v.trim()) || 'Names must contain only letters, spaces, hyphens, or apostrophes',
+    },
+  };
+
+  const onSubmit = (data) => {
     addAuthor.reset();
-
-    const trimmedFirst = firstName.trim();
-    const trimmedSurname = surname.trim();
-
-    if (!trimmedFirst || !trimmedSurname) {
-      setValidationError('Please fill all required fields');
-      return;
-    }
-
-    if (!NAME_REGEX.test(trimmedFirst) || !NAME_REGEX.test(trimmedSurname)) {
-      setValidationError('Names must contain only letters, spaces, hyphens, or apostrophes');
-      return;
-    }
-
-    addAuthor.mutate({ firstName: trimmedFirst, surname: trimmedSurname });
+    addAuthor.mutate({ firstName: data.firstName.trim(), surname: data.surname.trim() });
   };
 
   if (isLoading) return <p>Loading authors...</p>;
@@ -90,7 +80,7 @@ export default function AuthorsPage() {
           <Button
             id="toggle-add-author-btn"
             variant={showForm ? 'outline' : 'primary'}
-            onClick={() => { setShowForm(!showForm); setValidationError(''); }}
+            onClick={() => { setShowForm(!showForm); resetForm(); }}
           >
             {showForm ? 'Cancel' : 'Add Author'}
           </Button>
@@ -98,19 +88,17 @@ export default function AuthorsPage() {
       )}
 
       {showForm && (
-        <form id="add-author-form" className={styles.form} onSubmit={handleSubmit}>
+        <form id="add-author-form" className={styles.form} onSubmit={handleSubmit(onSubmit)}>
           {formFields.map((field) => (
             <FormInput
               key={field.name}
               id={field.id}
               label={field.label}
-              name={field.name}
-              value={field.value}
-              onChange={(e) => field.setter(e.target.value)}
               placeholder={field.placeholder}
+              error={errors[field.name]?.message}
+              {...register(field.name, nameRules)}
             />
           ))}
-          {validationError && <p id="add-author-validation-error" className={styles.error}>{validationError}</p>}
           {addAuthor.error && <p id="add-author-error" className={styles.error}>{addAuthor.error.message}</p>}
           <Button id="add-author-submit-btn" type="submit" disabled={addAuthor.isPending}>
             {addAuthor.isPending ? 'Adding...' : 'Add Author'}
