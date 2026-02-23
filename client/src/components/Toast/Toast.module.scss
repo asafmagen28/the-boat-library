@@ -1,0 +1,65 @@
+@use '../../styles/variables';
+
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: variables.$spacing-sm;
+  padding: variables.$spacing-md;
+  background: variables.$bg-white;
+  border-radius: variables.$radius-md;
+  box-shadow: variables.$shadow-lg;
+  border-left: 4px solid variables.$border-color;
+  min-width: 280px;
+  max-width: 420px;
+  animation: slideIn 0.3s ease-out;
+  pointer-events: auto;
+}
+
+.message {
+  flex: 1;
+  font-size: variables.$font-size-sm;
+  color: variables.$text-primary;
+  line-height: 1.4;
+}
+
+.closeBtn {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  font-size: variables.$font-size-lg;
+  color: variables.$text-muted;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+
+  &:hover {
+    color: variables.$text-primary;
+  }
+}
+
+.error {
+  border-left-color: variables.$danger;
+}
+
+.success {
+  border-left-color: variables.$success;
+}
+
+.warning {
+  border-left-color: variables.$warning;
+}
+
+.info {
+  border-left-color: variables.$info;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}

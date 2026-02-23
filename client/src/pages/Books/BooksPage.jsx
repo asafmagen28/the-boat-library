@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import { ROLES } from '../../constants/roles';
 import { QUERY_KEYS } from '../../services/api';
 import { useBooks, useAddBook, useDeleteBook } from '../../services/books.api';
@@ -15,6 +16,7 @@ import styles from './BooksPage.module.scss';
 
 export default function BooksPage() {
   const { user } = useAuth();
+  const { showToast } = useToast();
   const isEmployee = user?.roleId === ROLES.EMPLOYEE;
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
@@ -53,6 +55,11 @@ export default function BooksPage() {
         old.filter((book) => book.id !== deletedId)
       );
       closeModal();
+      showToast('Book deleted successfully', 'success');
+    },
+    onError: (error) => {
+      closeModal();
+      showToast(error.message, 'error');
     },
   });
 
@@ -67,8 +74,12 @@ export default function BooksPage() {
       );
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.myLoans });
       closeModal();
+      showToast('Book borrowed successfully', 'success');
     },
-    onError: closeModal,
+    onError: (error) => {
+      closeModal();
+      showToast(error.message, 'error');
+    },
   });
 
   const MODALS = {
@@ -193,9 +204,6 @@ export default function BooksPage() {
           </Button>
         </form>
       )}
-
-      {deleteBook.error && <p id="delete-book-error" className={styles.error}>{deleteBook.error.message}</p>}
-      {borrowBook.error && <p id="borrow-book-error" className={styles.error}>{borrowBook.error.message}</p>}
 
       <div className={styles.grid}>
         {books.map((book) => (
