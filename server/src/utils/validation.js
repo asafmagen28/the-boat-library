@@ -15,3 +15,12 @@ export const parseNumber = (value, fieldName) => {
   }
   return num;
 };
+
+const MAX_LIMIT = 50;
+
+export const parsePaginationParams = (query) => {
+  const page = query.page != null ? parsePositiveInt(query.page, "page") : 1;
+  const rawLimit = query.limit != null ? parsePositiveInt(query.limit, "limit") : 10;
+  const limit = Math.min(rawLimit, MAX_LIMIT);
+  return { page, limit };
+};

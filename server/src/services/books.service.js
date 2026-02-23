@@ -1,34 +1,31 @@
-import { sequelize, Book, Author, Copy, Status } from "../models/index.js";
+import { sequelize, Book, Author, Copy } from "../models/index.js";
 import { getStatus } from "../utils/lookupCache.js";
 import AppError from "../utils/AppError.js";
 
-export const getAllBooks = async () => {
-  const books = await Book.findAll({
-    order: [["title", "ASC"]],
-    include: [
-      { model: Author, as: "author" },
-      {
-        model: Copy,
-        as: 'copies',
-        include: [{ model: Status, as: 'status' }]
-      },
-    ]
-  });
-
+export const getAllBooks = async ({ page = 1, limit = 10 } = {}) => {
   const availableStatus = await getStatus("available");
-  return books.map((book) => {
-    const bookJson = book.toJSON();
-    const { copies, ...bookData } = bookJson;
 
-    const availableCopies = copies.filter(
-      (copy) => copy.statusId === availableStatus.id
-    ).length;
-
-    return {
-      ...bookData,
-      availableCopies
-    };
+  const { rows: books, count: totalBooks } = await Book.findAndCountAll({
+    order: [["title", "ASC"]],
+    limit,
+    offset: (page - 1) * limit,
+    distinct: true,
+    include: [{ model: Author, as: "author" }],
+    attributes: {
+      include: [
+        [
+          sequelize.literal(`(
+            SELECT COUNT(*) FROM "lib_copy" AS "copies"
+            WHERE "copies"."bookId" = "Book"."id"
+              AND "copies"."statusId" = ${availableStatus.id}
+          )`),
+          "availableCopies",
+        ],
+      ],
+    },
   });
+
+  return { books, totalBooks };
 };
 
 export const createBook = async ({ title, authorId, price, fee, numberOfCopies = 1 }) => {
