@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../context/AuthContext';
@@ -13,6 +14,7 @@ import BookCard from '../../components/BookCard/BookCard';
 import Button from '../../components/Button/Button';
 import FormInput from '../../components/FormInput/FormInput';
 import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
+import Pagination from '../../components/Pagination/Pagination';
 import styles from './BooksPage.module.scss';
 
 export default function BooksPage() {
@@ -24,32 +26,32 @@ export default function BooksPage() {
   const [activeModal, setActiveModal] = useState(null);
   const closeModal = () => setActiveModal(null);
 
-  const { register, handleSubmit, watch, reset: resetForm, getValues, formState: { errors } } = useForm({
+  const [searchParams, setSearchParams] = useSearchParams();
+  const page = Number(searchParams.get('page')) || 1;
+
+  const { register, handleSubmit, watch, reset: resetForm, formState: { errors } } = useForm({
     mode: 'onBlur',
     defaultValues: { numberOfCopies: '1' },
   });
 
-  const { data: books = [], isLoading, error } = useBooks();
+  const { data, isLoading, error, isPlaceholderData } = useBooks({ page });
+  const books = data?.books ?? [];
+  const totalPages = data?.totalPages ?? 0;
+  const currentPage = data?.currentPage ?? page;
   const { data: authors = [] } = useAuthors({ enabled: showForm });
 
   const addBook = useAddBook({
-    onSuccess: (response) => {
-      const newBook = response.data;
-      const author = authors.find((a) => a.id === newBook.authorId);
-      queryClient.setQueryData(QUERY_KEYS.books, (old = []) => [
-        ...old,
-        { ...newBook, author, availableCopies: Number(getValues('numberOfCopies')) || 1 },
-      ]);
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.books });
       resetForm();
       setShowForm(false);
+      showToast('Book added successfully', 'success');
     },
   });
 
   const deleteBook = useDeleteBook({
-    onSuccess: (_response, deletedId) => {
-      queryClient.setQueryData(QUERY_KEYS.books, (old = []) =>
-        old.filter((book) => book.id !== deletedId)
-      );
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.books });
       closeModal();
       showToast('Book deleted successfully', 'success');
     },
@@ -61,13 +63,17 @@ export default function BooksPage() {
 
   const borrowBook = useBorrowBook({
     onSuccess: (_response, variables) => {
-      queryClient.setQueryData(QUERY_KEYS.books, (old = []) =>
-        old.map((book) =>
-          book.id === variables.bookId
-            ? { ...book, availableCopies: book.availableCopies - 1 }
-            : book
-        )
-      );
+      queryClient.setQueryData([...QUERY_KEYS.books, { page, limit: 10 }], (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          books: old.books.map((book) =>
+            book.id === variables.bookId
+              ? { ...book, availableCopies: book.availableCopies - 1 }
+              : book
+          ),
+        };
+      });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.myLoans });
       closeModal();
       showToast('Book borrowed successfully', 'success');
@@ -142,6 +148,10 @@ export default function BooksPage() {
     });
   };
 
+  const handlePageChange = (newPage) => {
+    setSearchParams(newPage === 1 ? {} : { page: String(newPage) });
+  };
+
   if (isLoading) return <p>Loading books...</p>;
   if (error) return <p id="books-error">Error: {error.message}</p>;
 
@@ -197,7 +207,7 @@ export default function BooksPage() {
         </form>
       )}
 
-      <div className={styles.grid}>
+      <div className={`${styles.grid} ${isPlaceholderData ? styles.loading : ''}`}>
         {books.map((book) => (
           <BookCard
             key={book.id}
@@ -211,6 +221,14 @@ export default function BooksPage() {
       </div>
 
       {books.length === 0 && <p className={styles.empty}>No books in the catalog yet.</p>}
+
+      <Pagination
+        id="books-pagination"
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+        isDisabled={isPlaceholderData}
+      />
 
       {activeModal && (
         <ConfirmModal

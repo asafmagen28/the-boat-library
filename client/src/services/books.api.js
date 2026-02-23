@@ -1,10 +1,11 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, keepPreviousData } from '@tanstack/react-query';
 import api, { QUERY_KEYS } from './api';
 
-export const useBooks = (options = {}) => {
+export const useBooks = ({ page = 1, limit = 10 } = {}, options = {}) => {
   return useQuery({
-    queryKey: QUERY_KEYS.books,
-    queryFn: () => api.get('/books').then((res) => res.data),
+    queryKey: [...QUERY_KEYS.books, { page, limit }],
+    queryFn: () => api.get('/books', { params: { page, limit } }).then((res) => res.data),
+    placeholderData: keepPreviousData,
     ...options,
   });
 };
