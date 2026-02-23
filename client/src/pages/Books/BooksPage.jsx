@@ -15,6 +15,7 @@ import Button from '../../components/Button/Button';
 import FormInput from '../../components/FormInput/FormInput';
 import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
 import Pagination from '../../components/Pagination/Pagination';
+import EmptyState from '../../components/EmptyState/EmptyState';
 import styles from './BooksPage.module.scss';
 
 export default function BooksPage() {
@@ -220,7 +221,7 @@ export default function BooksPage() {
         ))}
       </div>
 
-      {books.length === 0 && <p className={styles.empty}>No books in the catalog yet.</p>}
+      {books.length === 0 && <EmptyState id="books-empty-state" message="No books in the catalog yet." icon="📚" />}
 
       <Pagination
         id="books-pagination"

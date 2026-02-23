@@ -6,6 +6,7 @@ import { useCustomers, useDeleteUser } from '../../services/users.api';
 import PageHeader from '../../components/PageHeader/PageHeader';
 import Button from '../../components/Button/Button';
 import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
+import EmptyState from '../../components/EmptyState/EmptyState';
 import styles from './ManageCustomersPage.module.scss';
 
 export default function ManageCustomersPage() {
@@ -63,7 +64,7 @@ export default function ManageCustomersPage() {
         ))}
       </div>
 
-      {customers.length === 0 && <p className={styles.empty}>No customers found.</p>}
+      {customers.length === 0 && <EmptyState id="manage-customers-empty-state" message="No customers found." icon="👤" />}
 
       <ConfirmModal
         id="delete-customer-modal"

@@ -1,5 +1,6 @@
 import { useMyLoans } from '../../services/loans.api';
 import PageHeader from '../../components/PageHeader/PageHeader';
+import EmptyState from '../../components/EmptyState/EmptyState';
 import styles from './MyLoansPage.module.scss';
 
 export default function MyLoansPage() {
@@ -36,7 +37,7 @@ export default function MyLoansPage() {
         })}
       </div>
 
-      {loans.length === 0 && <p className={styles.empty}>You have no loans yet.</p>}
+      {loans.length === 0 && <EmptyState id="my-loans-empty-state" message="You have no loans yet." icon="📖" />}
     </section>
   );
 }

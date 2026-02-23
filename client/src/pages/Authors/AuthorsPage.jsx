@@ -11,6 +11,7 @@ import Button from '../../components/Button/Button';
 import FormInput from '../../components/FormInput/FormInput';
 import { NAME_REGEX } from '../../constants/validation';
 import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
+import EmptyState from '../../components/EmptyState/EmptyState';
 import styles from './AuthorsPage.module.scss';
 
 export default function AuthorsPage() {
@@ -123,7 +124,7 @@ export default function AuthorsPage() {
         ))}
       </div>
 
-      {authors.length === 0 && <p className={styles.empty}>No authors found.</p>}
+      {authors.length === 0 && <EmptyState id="authors-empty-state" message="No authors found." icon="✍️" />}
 
       <ConfirmModal
         id="delete-author-modal"

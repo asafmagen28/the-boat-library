@@ -6,6 +6,7 @@ import { useAllLoans, useReturnLoan } from '../../services/loans.api';
 import PageHeader from '../../components/PageHeader/PageHeader';
 import Button from '../../components/Button/Button';
 import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
+import EmptyState from '../../components/EmptyState/EmptyState';
 import styles from './ManageLoansPage.module.scss';
 
 export default function ManageLoansPage() {
@@ -60,7 +61,7 @@ export default function ManageLoansPage() {
         ))}
       </div>
 
-      {loans.length === 0 && <p className={styles.empty}>No active loans.</p>}
+      {loans.length === 0 && <EmptyState id="manage-loans-empty-state" message="No active loans." icon="📚" />}
 
       <ConfirmModal
         id="return-loan-modal"
