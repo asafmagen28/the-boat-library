@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import { ROLES } from '../../constants/roles';
 import { QUERY_KEYS } from '../../services/api';
 import { useAuthors, useAddAuthor, useDeleteAuthor } from '../../services/authors.api';
@@ -21,6 +22,7 @@ export default function AuthorsPage() {
   const [validationError, setValidationError] = useState('');
   const [authorToDelete, setAuthorToDelete] = useState(null);
 
+  const { showToast } = useToast();
   const queryClient = useQueryClient();
   const { data: authors = [], isLoading, error } = useAuthors();
 
@@ -42,6 +44,11 @@ export default function AuthorsPage() {
         old.filter((author) => author.id !== deletedId)
       );
       setAuthorToDelete(null);
+      showToast('Author deleted successfully', 'success');
+    },
+    onError: (error) => {
+      setAuthorToDelete(null);
+      showToast(error.message, 'error');
     },
   });
 
@@ -110,8 +117,6 @@ export default function AuthorsPage() {
           </Button>
         </form>
       )}
-
-      {deleteAuthor.error && <p id="delete-author-error" className={styles.error}>{deleteAuthor.error.message}</p>}
 
       <div className={styles.list}>
         {authors.map((author) => (

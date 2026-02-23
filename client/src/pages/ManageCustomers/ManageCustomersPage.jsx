@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { useToast } from '../../context/ToastContext';
 import { QUERY_KEYS } from '../../services/api';
 import { useCustomers, useDeleteUser } from '../../services/users.api';
 import PageHeader from '../../components/PageHeader/PageHeader';
@@ -9,6 +10,7 @@ import styles from './ManageCustomersPage.module.scss';
 
 export default function ManageCustomersPage() {
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
   const { data: customers = [], isLoading, error } = useCustomers();
   const [customerToDelete, setCustomerToDelete] = useState(null);
 
@@ -18,6 +20,11 @@ export default function ManageCustomersPage() {
         old.filter((customer) => customer.id !== deletedId)
       );
       setCustomerToDelete(null);
+      showToast('Customer deleted successfully', 'success');
+    },
+    onError: (error) => {
+      setCustomerToDelete(null);
+      showToast(error.message, 'error');
     },
   });
 
@@ -37,8 +44,6 @@ export default function ManageCustomersPage() {
   return (
     <section id="manage-customers-page">
       <PageHeader id="manage-customers-page-header" title="Manage Customers" subtitle="View and manage customer accounts" />
-
-      {deleteUser.error && <p id="delete-customer-error" className={styles.error}>{deleteUser.error.message}</p>}
 
       <div className={styles.list}>
         {customers.map((customer) => (

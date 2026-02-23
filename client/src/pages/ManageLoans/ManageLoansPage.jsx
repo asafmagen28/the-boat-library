@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { useToast } from '../../context/ToastContext';
 import { QUERY_KEYS } from '../../services/api';
 import { useAllLoans, useReturnLoan } from '../../services/loans.api';
 import PageHeader from '../../components/PageHeader/PageHeader';
@@ -9,6 +10,7 @@ import styles from './ManageLoansPage.module.scss';
 
 export default function ManageLoansPage() {
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
   const [loanToReturn, setLoanToReturn] = useState(null);
   const { data: loans = [], isLoading, error } = useAllLoans();
 
@@ -19,6 +21,11 @@ export default function ManageLoansPage() {
       );
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.books });
       setLoanToReturn(null);
+      showToast('Book returned successfully', 'success');
+    },
+    onError: (error) => {
+      setLoanToReturn(null);
+      showToast(error.message, 'error');
     },
   });
 
@@ -28,8 +35,6 @@ export default function ManageLoansPage() {
   return (
     <section id="manage-loans-page">
       <PageHeader id="manage-loans-page-header" title="Manage Loans" subtitle="Process loans and returns" />
-
-      {returnLoan.error && <p id="return-loan-error" className={styles.error}>{returnLoan.error.message}</p>}
 
       <div className={styles.list}>
         {loans.map((loan) => (
