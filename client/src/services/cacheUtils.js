@@ -16,8 +16,6 @@ export const QUERY_KEYS = {
 
 /**
  * Helper to invalidate multiple query patterns at once
- * @param {QueryClient} queryClient - React Query client
- * @param {Array} queryKeys - Array of query key patterns to invalidate
  */
 export const invalidateQueries = (queryClient, queryKeys) => {
   queryKeys.forEach(queryKey => {
