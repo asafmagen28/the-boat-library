@@ -3,6 +3,8 @@
  * Provides query keys and essential helpers for cache management
  */
 
+import { PAGINATION } from '../constants/api';
+
 // Centralized query key definitions following React Query best practices
 export const QUERY_KEYS = {
   authors: ['authors'],
@@ -68,13 +70,13 @@ export const optimisticReturnLoan = async (queryClient, loanId) => {
  * Optimistically handle book borrowing - Complex business logic
  * This decrements book availability across paginated queries
  */
-export const optimisticBorrowBook = async (queryClient, { bookId }, page = 1) => {
+export const optimisticBorrowBook = async (queryClient, { bookId }, page = PAGINATION.DEFAULT_PAGE) => {
   await queryClient.cancelQueries({ queryKey: QUERY_KEYS.books });
   await queryClient.cancelQueries({ queryKey: QUERY_KEYS.myLoans });
 
-  const previousBooksData = queryClient.getQueryData([...QUERY_KEYS.books, { page, limit: 10 }]);
+  const previousBooksData = queryClient.getQueryData([...QUERY_KEYS.books, { page, limit: PAGINATION.DEFAULT_LIMIT }]);
 
-  queryClient.setQueryData([...QUERY_KEYS.books, { page, limit: 10 }], (old) => {
+  queryClient.setQueryData([...QUERY_KEYS.books, { page, limit: PAGINATION.DEFAULT_LIMIT }], (old) => {
     if (!old) return old;
     return {
       ...old,
@@ -110,7 +112,7 @@ export const rollbackOptimisticUpdate = (queryClient, context) => {
 
   // Rollback single books query if available
   if (context.previousBooksData !== undefined) {
-    const page = 1;
-    queryClient.setQueryData([...QUERY_KEYS.books, { page, limit: 10 }], context.previousBooksData);
+    const page = PAGINATION.DEFAULT_PAGE;
+    queryClient.setQueryData([...QUERY_KEYS.books, { page, limit: PAGINATION.DEFAULT_LIMIT }], context.previousBooksData);
   }
 };
