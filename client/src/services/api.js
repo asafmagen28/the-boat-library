@@ -1,14 +1,6 @@
 import axios from 'axios';
 import { useMutation } from '@tanstack/react-query';
 
-export const QUERY_KEYS = {
-  books: ['books'],
-  authors: ['authors'],
-  loans: ['loans'],
-  myLoans: ['myLoans'],
-  customers: ['customers'],
-};
-
 const api = axios.create({
   baseURL: process.env.REACT_APP_API_URL || 'http://localhost:3001/api',
 });

@@ -1,7 +1,5 @@
 import { useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '../../context/ToastContext';
-import { QUERY_KEYS } from '../../services/api';
 import { useAllLoans, useReturnLoan } from '../../services/loans.api';
 import PageHeader from '../../components/PageHeader/PageHeader';
 import Button from '../../components/Button/Button';
@@ -10,23 +8,20 @@ import EmptyState from '../../components/EmptyState/EmptyState';
 import styles from './ManageLoansPage.module.scss';
 
 export default function ManageLoansPage() {
-  const queryClient = useQueryClient();
   const { showToast } = useToast();
   const [loanToReturn, setLoanToReturn] = useState(null);
   const { data: loans = [], isLoading, error } = useAllLoans();
 
   const returnLoan = useReturnLoan({
-    onSuccess: (_response, returnedLoanId) => {
-      queryClient.setQueryData(QUERY_KEYS.loans, (old = []) =>
-        old.filter((loan) => loan.id !== returnedLoanId)
-      );
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.books });
-      setLoanToReturn(null);
-      showToast('Book returned successfully', 'success');
-    },
+    // Override only the UI-specific behaviors
+    // Cache management is now handled automatically by the service
     onError: (error) => {
       setLoanToReturn(null);
       showToast(error.message, 'error');
+    },
+    onSuccess: () => {
+      setLoanToReturn(null);
+      showToast('Book returned successfully', 'success');
     },
   });
 

@@ -1,10 +1,8 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { ROLES } from '../../constants/roles';
-import { QUERY_KEYS } from '../../services/api';
 import { useAuthors, useAddAuthor, useDeleteAuthor } from '../../services/authors.api';
 import PageHeader from '../../components/PageHeader/PageHeader';
 import Button from '../../components/Button/Button';
@@ -23,31 +21,29 @@ export default function AuthorsPage() {
   const { register, handleSubmit, reset: resetForm, formState: { errors } } = useForm({ mode: 'onBlur' });
 
   const { showToast } = useToast();
-  const queryClient = useQueryClient();
   const { data: authors = [], isLoading, error } = useAuthors();
 
   const addAuthor = useAddAuthor({
-    onSuccess: (response) => {
-      queryClient.setQueryData(QUERY_KEYS.authors, (old = []) => [
-        ...old,
-        response.data,
-      ]);
+    onSuccess: () => {
       resetForm();
       setShowForm(false);
+      showToast('Author added successfully', 'success');
     },
   });
 
   const deleteAuthor = useDeleteAuthor({
-    onSuccess: (_response, deletedId) => {
-      queryClient.setQueryData(QUERY_KEYS.authors, (old = []) =>
-        old.filter((author) => author.id !== deletedId)
-      );
+    onSuccess: () => {
       setAuthorToDelete(null);
       showToast('Author deleted successfully', 'success');
     },
     onError: (error) => {
       setAuthorToDelete(null);
-      showToast(error.message, 'error');
+      // Provide user-friendly error messages
+      if (error.message.includes('unsaved author')) {
+        showToast('Please wait for the author to save before deleting', 'warning');
+      } else {
+        showToast(error.message, 'error');
+      }
     },
   });
 
@@ -109,16 +105,36 @@ export default function AuthorsPage() {
 
       <div className={styles.list}>
         {authors.map((author) => (
-          <div key={author.id} id={`author-item-${author.id}`} className={styles.authorItem}>
-            <span className={styles.authorName}>{author.firstName} {author.surname}</span>
+          <div
+            key={author.id}
+            id={`author-item-${author.id}`}
+            className={`${styles.authorItem} ${author.isOptimistic ? styles.optimistic : ''}`}
+          >
+            <div className={styles.authorInfo}>
+              <span className={styles.authorName}>{author.firstName} {author.surname}</span>
+              {author.isOptimistic && (
+                <span className={styles.savingIndicator}>Saving...</span>
+              )}
+            </div>
             {isEmployee && (
-              <Button
-                id={`author-delete-btn-${author.id}`}
-                variant="danger"
-                onClick={() => setAuthorToDelete(author)}
-              >
-                Delete
-              </Button>
+              author.isOptimistic ? (
+                <Button
+                  id={`author-delete-btn-${author.id}`}
+                  variant="outline"
+                  disabled={true}
+                >
+                  Saving...
+                </Button>
+              ) : (
+                <Button
+                  id={`author-delete-btn-${author.id}`}
+                  variant="danger"
+                  onClick={() => setAuthorToDelete(author)}
+                  disabled={deleteAuthor.isPending}
+                >
+                  Delete
+                </Button>
+              )
             )}
           </div>
         ))}

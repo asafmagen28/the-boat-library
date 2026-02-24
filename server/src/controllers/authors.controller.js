@@ -29,7 +29,14 @@ export const addAuthor = async (req, res) => {
 };
 
 export const removeAuthor = async (req, res) => {
-  const id = parsePositiveInt(req.params.id);
+  const idParam = req.params.id;
+
+  // Check for temporary ID patterns from optimistic updates
+  if (idParam && idParam.toString().startsWith('temp-')) {
+    throw new AppError("Cannot delete unsaved author. Please wait for the author to be saved first.", 400);
+  }
+
+  const id = parsePositiveInt(idParam);
   const author = await deleteAuthor(id);
   return res.json(author);
 };

@@ -1,7 +1,5 @@
 import { useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '../../context/ToastContext';
-import { QUERY_KEYS } from '../../services/api';
 import { useCustomers, useDeleteUser } from '../../services/users.api';
 import PageHeader from '../../components/PageHeader/PageHeader';
 import Button from '../../components/Button/Button';
@@ -10,16 +8,12 @@ import EmptyState from '../../components/EmptyState/EmptyState';
 import styles from './ManageCustomersPage.module.scss';
 
 export default function ManageCustomersPage() {
-  const queryClient = useQueryClient();
   const { showToast } = useToast();
   const { data: customers = [], isLoading, error } = useCustomers();
   const [customerToDelete, setCustomerToDelete] = useState(null);
 
   const deleteUser = useDeleteUser({
-    onSuccess: (_response, deletedId) => {
-      queryClient.setQueryData(QUERY_KEYS.customers, (old = []) =>
-        old.filter((customer) => customer.id !== deletedId)
-      );
+    onSuccess: () => {
       setCustomerToDelete(null);
       showToast('Customer deleted successfully', 'success');
     },

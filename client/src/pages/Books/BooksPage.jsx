@@ -1,11 +1,9 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { ROLES } from '../../constants/roles';
-import { QUERY_KEYS } from '../../services/api';
 import { useBooks, useAddBook, useDeleteBook } from '../../services/books.api';
 import { useBorrowBook } from '../../services/loans.api';
 import { useAuthors } from '../../services/authors.api';
@@ -22,7 +20,6 @@ export default function BooksPage() {
   const { user } = useAuth();
   const { showToast } = useToast();
   const isEmployee = user?.roleId === ROLES.EMPLOYEE;
-  const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [activeModal, setActiveModal] = useState(null);
   const closeModal = () => setActiveModal(null);
@@ -42,17 +39,20 @@ export default function BooksPage() {
   const { data: authors = [] } = useAuthors({ enabled: showForm });
 
   const addBook = useAddBook({
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.books });
+    onSuccess: (response) => {
       resetForm();
       setShowForm(false);
-      showToast('Book added successfully', 'success');
+      const newBook = response?.data;
+      if (newBook?.title) {
+        showToast(`"${newBook.title}" has been added to your library!`, 'success');
+      } else {
+        showToast('Book added successfully', 'success');
+      }
     },
   });
 
   const deleteBook = useDeleteBook({
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.books });
       closeModal();
       showToast('Book deleted successfully', 'success');
     },
@@ -63,19 +63,7 @@ export default function BooksPage() {
   });
 
   const borrowBook = useBorrowBook({
-    onSuccess: (_response, variables) => {
-      queryClient.setQueryData([...QUERY_KEYS.books, { page, limit: 10 }], (old) => {
-        if (!old) return old;
-        return {
-          ...old,
-          books: old.books.map((book) =>
-            book.id === variables.bookId
-              ? { ...book, availableCopies: book.availableCopies - 1 }
-              : book
-          ),
-        };
-      });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.myLoans });
+    onSuccess: () => {
       closeModal();
       showToast('Book borrowed successfully', 'success');
     },
