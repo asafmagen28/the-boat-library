@@ -1,10 +1,15 @@
 import { sequelize, Loan, Copy, Book, Author, Transaction, User } from "../models/index.js";
 import { getStatus, getTransactionType } from "../utils/lookupCache.js";
-import { BORROW_MAX_DAYS } from "../constants/loans.js";
+import { BORROW_MAX_DAYS, MAX_ACTIVE_LOANS } from "../constants/loans.js";
 import AppError from "../utils/AppError.js";
 import { getUserBudget } from "./users.service.js";
 
 export const createLoan = async ({ bookId, borrowerId }) => {
+  const activeLoans = await Loan.count({ where: { borrowerId, returnDate: null } });
+  if (activeLoans >= MAX_ACTIVE_LOANS) {
+    throw new AppError(`Loan limit reached (max ${MAX_ACTIVE_LOANS} active loans)`, 400);
+  }
+
   const budget = await getUserBudget(borrowerId);
   const book = await Book.findByPk(bookId);
   if (!book) throw new AppError("Book not found", 404);
@@ -86,29 +91,39 @@ export const returnLoan = async ({ loanId }) => {
 
 export const getAllLoans = async () => {
   return await Loan.findAll(
-    { include: [
-      { model: User, as: 'borrower' },
-      { model: Copy, as: 'copy', include: [
-        { model: Book, as: 'book', include: [
-          { model: Author, as: 'author'}
-        ]}
-      ]}
-    ],
-    where: { returnDate: null },
-    order: [["loanDate", "DESC"]],
-  });
+    {
+      include: [
+        { model: User, as: 'borrower' },
+        {
+          model: Copy, as: 'copy', include: [
+            {
+              model: Book, as: 'book', include: [
+                { model: Author, as: 'author' }
+              ]
+            }
+          ]
+        }
+      ],
+      where: { returnDate: null },
+      order: [["loanDate", "DESC"]],
+    });
 };
 
 export const getMyLoans = async (borrowerId) => {
   return await Loan.findAll(
-    { include: [
-      { model: Copy, as: 'copy', include: [
-        { model: Book, as: 'book', include: [
-          { model: Author, as: 'author'}
-        ]}
-      ]}
-    ],
-    where: { borrowerId },
-    order: [["loanDate", "DESC"]],
-  });
+    {
+      include: [
+        {
+          model: Copy, as: 'copy', include: [
+            {
+              model: Book, as: 'book', include: [
+                { model: Author, as: 'author' }
+              ]
+            }
+          ]
+        }
+      ],
+      where: { borrowerId },
+      order: [["loanDate", "DESC"]],
+    });
 };
