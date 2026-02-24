@@ -44,7 +44,7 @@ export const useBooks = ({ page = PAGINATION.DEFAULT_PAGE, limit = PAGINATION.DE
   });
 };
 
-export const useAddBook = (options = {}) => {
+export const useAddBook = ({ onSuccess, onError, onMutate, ...restOptions } = {}) => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -83,7 +83,7 @@ export const useAddBook = (options = {}) => {
       }));
 
       invalidateQueries(queryClient, [QUERY_KEYS.books]);
-      options.onSuccess?.(savedBook, variables, context);
+      onSuccess?.(savedBook, variables, context);
     },
 
     onError: (error, variables, context) => {
@@ -92,14 +92,14 @@ export const useAddBook = (options = {}) => {
         queryClient.setQueryData(queryKey, previousData);
       });
 
-      options.onError?.(error, variables, context);
+      onError?.(error, variables, context);
     },
 
-    ...options
+    ...restOptions
   });
 };
 
-export const useDeleteBook = (options = {}) => {
+export const useDeleteBook = ({ onSuccess, onError, onMutate, ...restOptions } = {}) => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -124,7 +124,7 @@ export const useDeleteBook = (options = {}) => {
       invalidateQueries(queryClient, [QUERY_KEYS.books]);
 
       // Call component's onSuccess if provided
-      options.onSuccess?.(data, bookId, context);
+      onSuccess?.(data, bookId, context);
     },
 
     onError: (error, bookId, context) => {
@@ -133,9 +133,9 @@ export const useDeleteBook = (options = {}) => {
         queryClient.setQueryData(queryKey, previousData);
       });
 
-      options.onError?.(error, bookId, context);
+      onError?.(error, bookId, context);
     },
 
-    ...options
+    ...restOptions
   });
 };

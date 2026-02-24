@@ -10,7 +10,7 @@ export const useCustomers = (options = {}) => {
   });
 };
 
-export const useDeleteUser = (options = {}) => {
+export const useDeleteUser = ({ onSuccess, onError, onMutate, ...restOptions } = {}) => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -35,7 +35,7 @@ export const useDeleteUser = (options = {}) => {
       invalidateQueries(queryClient, [QUERY_KEYS.customers]);
 
       // Call component's onSuccess if provided
-      options.onSuccess?.(data, userId, context);
+      onSuccess?.(data, userId, context);
     },
 
     onError: (error, userId, context) => {
@@ -44,9 +44,9 @@ export const useDeleteUser = (options = {}) => {
       }
 
       // Call component's onError if provided
-      options.onError?.(error, userId, context);
+      onError?.(error, userId, context);
     },
 
-    ...options
+    ...restOptions
   });
 };

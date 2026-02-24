@@ -18,7 +18,7 @@ export const useMyLoans = (options = {}) => {
   });
 };
 
-export const useBorrowBook = (options = {}) => {
+export const useBorrowBook = ({ onSuccess, onError, onMutate, ...restOptions } = {}) => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -34,23 +34,19 @@ export const useBorrowBook = (options = {}) => {
 
     onSuccess: (data, variables, context) => {
       invalidateQueries(queryClient, [QUERY_KEYS.myLoans, QUERY_KEYS.books]);
-
-      // Call component's onSuccess if provided
-      options.onSuccess?.(data, variables, context);
+      onSuccess?.(data, variables, context);
     },
 
     onError: (error, variables, context) => {
       rollbackOptimisticUpdate(queryClient, context);
-
-      // Call component's onError if provided
-      options.onError?.(error, variables, context);
+      onError?.(error, variables, context);
     },
 
-    ...options
+    ...restOptions
   });
 };
 
-export const useReturnLoan = (options = {}) => {
+export const useReturnLoan = ({ onSuccess, onError, onMutate, ...restOptions } = {}) => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -66,18 +62,14 @@ export const useReturnLoan = (options = {}) => {
 
     onSuccess: (data, loanId, context) => {
       invalidateQueries(queryClient, [QUERY_KEYS.loans, QUERY_KEYS.books]);
-
-      // Call component's onSuccess if provided
-      options.onSuccess?.(data, loanId, context);
+      onSuccess?.(data, loanId, context);
     },
 
     onError: (error, loanId, context) => {
       rollbackOptimisticUpdate(queryClient, context);
-
-      // Call component's onError if provided
-      options.onError?.(error, loanId, context);
+      onError?.(error, loanId, context);
     },
 
-    ...options
+    ...restOptions
   });
 };

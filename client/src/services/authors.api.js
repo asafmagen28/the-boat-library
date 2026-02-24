@@ -12,7 +12,7 @@ export const useAuthors = (options = {}) => {
   });
 };
 
-export const useAddAuthor = (options = {}) => {
+export const useAddAuthor = ({ onSuccess, onError, onSettled, onMutate, ...restOptions } = {}) => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -76,7 +76,7 @@ export const useAddAuthor = (options = {}) => {
         });
 
         // Call component's onSuccess if provided
-        options.onSuccess?.(savedAuthor, variables, context);
+        onSuccess?.(savedAuthor, variables, context);
 
       } catch (error) {
         apiLogger.error('onSuccess callback', '', error);
@@ -94,7 +94,7 @@ export const useAddAuthor = (options = {}) => {
       }
 
       // Call component's onError if provided
-      options.onError?.(error, variables, context);
+      onError?.(error, variables, context);
     },
 
     onSettled: (data, error, variables, context) => {
@@ -102,14 +102,14 @@ export const useAddAuthor = (options = {}) => {
       invalidateQueries(queryClient, [QUERY_KEYS.authors]);
 
       // Call component's onSettled if provided
-      options.onSettled?.(data, error, variables, context);
+      onSettled?.(data, error, variables, context);
     },
 
-    ...options // Allow component-specific overrides
+    ...restOptions
   });
 };
 
-export const useDeleteAuthor = (options = {}) => {
+export const useDeleteAuthor = ({ onSuccess, onError, onMutate, ...restOptions } = {}) => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -155,7 +155,7 @@ export const useDeleteAuthor = (options = {}) => {
       invalidateQueries(queryClient, [QUERY_KEYS.authors]);
 
       // Call component's onSuccess if provided
-      options.onSuccess?.(data, authorId, context);
+      onSuccess?.(data, authorId, context);
     },
 
     // Error - Rollback optimistic update
@@ -166,9 +166,9 @@ export const useDeleteAuthor = (options = {}) => {
       }
 
       // Call component's onError if provided
-      options.onError?.(error, authorId, context);
+      onError?.(error, authorId, context);
     },
 
-    ...options
+    ...restOptions
   });
 };
