@@ -35,4 +35,8 @@ coverage/
 .pnp
 .pnp.js
 
+.claude/
+.mcp.json
+LEARNING_PLAN.md
+
 חפיפה-מתוקן (1).docx
