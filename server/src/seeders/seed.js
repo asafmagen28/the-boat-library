@@ -8,13 +8,30 @@ async function seed() {
     await sequelize.authenticate();
     console.log("DB connected");
 
-    await Status.findOrCreate({ where: { status: "available" } });
-    await Status.findOrCreate({ where: { status: "borrowed" } });
-    console.log("Statuses seeded");
+    // Wrap all seeding operations in a transaction
+    await sequelize.transaction(async (t) => {
+      // Seed Status records
+      await Status.findOrCreate({
+        where: { status: "available" },
+        transaction: t
+      });
+      await Status.findOrCreate({
+        where: { status: "borrowed" },
+        transaction: t
+      });
+      console.log("Statuses seeded");
 
-    await TransactionType.findOrCreate({ where: { type: "borrow_charge" } });
-    await TransactionType.findOrCreate({ where: { type: "deposit" } });
-    console.log("TransactionTypes seeded");
+      // Seed TransactionType records
+      await TransactionType.findOrCreate({
+        where: { type: "borrow_charge" },
+        transaction: t
+      });
+      await TransactionType.findOrCreate({
+        where: { type: "deposit" },
+        transaction: t
+      });
+      console.log("TransactionTypes seeded");
+    });
 
     console.log("Seed complete");
     process.exit(0);
