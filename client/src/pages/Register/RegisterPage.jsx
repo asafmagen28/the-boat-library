@@ -7,7 +7,7 @@ import Button from '../../components/Button/Button';
 import styles from './RegisterPage.module.scss';
 
 export default function RegisterPage() {
-  const { register, handleSubmit, watch, formState: { errors } } = useForm({ mode: 'onBlur' });
+  const { register, handleSubmit, watch, formState: { errors, isValid } } = useForm({ mode: 'onBlur' });
 
   const { loginWithToken } = useAuth();
   const navigate = useNavigate();
@@ -73,7 +73,7 @@ export default function RegisterPage() {
           />
         ))}
         {error && <p id="register-error" className={styles.error}>{error.message}</p>}
-        <Button id="register-submit-btn" type="submit" disabled={isPending}>
+        <Button id="register-submit-btn" type="submit" disabled={isPending} isFormValid={isValid}>
           {isPending ? 'Registering...' : 'Register'}
         </Button>
       </form>

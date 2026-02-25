@@ -18,7 +18,7 @@ export default function AuthorsPage() {
   const [showForm, setShowForm] = useState(false);
   const [authorToDelete, setAuthorToDelete] = useState(null);
 
-  const { register, handleSubmit, reset: resetForm, formState: { errors } } = useForm({ mode: 'onBlur' });
+  const { register, handleSubmit, reset: resetForm, formState: { errors, isValid } } = useForm({ mode: 'onBlur' });
 
   const { showToast } = useToast();
   const { data: authors = [], isLoading, error } = useAuthors();
@@ -97,7 +97,7 @@ export default function AuthorsPage() {
             />
           ))}
           {addAuthor.error && <p id="add-author-error" className={styles.error}>{addAuthor.error.message}</p>}
-          <Button id="add-author-submit-btn" type="submit" disabled={addAuthor.isPending}>
+          <Button id="add-author-submit-btn" type="submit" disabled={addAuthor.isPending} isFormValid={isValid}>
             {addAuthor.isPending ? 'Adding...' : 'Add Author'}
           </Button>
         </form>

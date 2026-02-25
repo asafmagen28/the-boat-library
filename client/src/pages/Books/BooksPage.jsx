@@ -27,7 +27,7 @@ export default function BooksPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const page = Number(searchParams.get('page')) || 1;
 
-  const { register, handleSubmit, watch, reset: resetForm, formState: { errors } } = useForm({
+  const { register, handleSubmit, watch, reset: resetForm, formState: { errors, isValid } } = useForm({
     mode: 'onBlur',
     defaultValues: { numberOfCopies: '1' },
   });
@@ -230,7 +230,7 @@ export default function BooksPage() {
             {errors.authorId && <span className={styles.error}>{errors.authorId.message}</span>}
           </div>
           {addBook.error && <p id="add-book-error" className={styles.error}>{addBook.error.message}</p>}
-          <Button id="add-book-submit-btn" type="submit" disabled={addBook.isPending}>
+          <Button id="add-book-submit-btn" type="submit" disabled={addBook.isPending} isFormValid={isValid}>
             {addBook.isPending ? 'Adding...' : 'Add Book'}
           </Button>
         </form>

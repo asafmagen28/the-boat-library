@@ -7,7 +7,7 @@ import Button from '../../components/Button/Button';
 import styles from './LoginPage.module.scss';
 
 export default function LoginPage() {
-  const { register, handleSubmit, formState: { errors } } = useForm({ mode: 'onBlur' });
+  const { register, handleSubmit, formState: { errors, isValid } } = useForm({ mode: 'onBlur' });
 
   const { loginWithToken } = useAuth();
   const navigate = useNavigate();
@@ -56,7 +56,7 @@ export default function LoginPage() {
           />
         ))}
         {error && <p id="login-error" className={styles.error}>{error.message}</p>}
-        <Button id="login-submit-btn" type="submit" disabled={isPending}>
+        <Button id="login-submit-btn" type="submit" disabled={isPending} isFormValid={isValid}>
           {isPending ? 'Logging in...' : 'Login'}
         </Button>
       </form>
