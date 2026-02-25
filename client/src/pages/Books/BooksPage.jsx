@@ -98,14 +98,26 @@ export default function BooksPage() {
     },
     price: {
       required: 'Price is required',
-      min: { value: 0, message: 'Price cannot be negative' },
+      min: { value: 0.01, message: 'Price must be greater than 0' },
+      setValueAs: value => {
+        const num = parseFloat(value);
+        return isNaN(num) ? 0 : Math.max(0.01, num);
+      }
     },
     fee: {
       required: 'Fee is required',
-      min: { value: 0, message: 'Fee cannot be negative' },
+      min: { value: 0.01, message: 'Fee must be greater than 0' },
       validate: {
-        notGreaterThanPrice: (v) => Number(v) <= Number(watch('price')) || 'Fee cannot be greater than the price',
+        notGreaterThanPrice: (v) => {
+          const feeNum = parseFloat(v);
+          const priceNum = parseFloat(watch('price'));
+          return feeNum <= priceNum || 'Fee cannot be greater than the price';
+        }
       },
+      setValueAs: value => {
+        const num = parseFloat(value);
+        return isNaN(num) ? 0 : Math.max(0.01, num);
+      }
     },
     numberOfCopies: {
       required: 'Number of copies is required',
@@ -119,10 +131,35 @@ export default function BooksPage() {
     },
   };
 
+  const preventNegativeKeys = (e) => {
+    // Only prevent minus key - keep it simple
+    if (e.key === '-') {
+      e.preventDefault();
+    }
+  };
+
   const formFields = [
     { id: 'add-book-title-input', label: 'Title', name: 'title', placeholder: 'Book title' },
-    { id: 'add-book-price-input', label: 'Price', name: 'price', type: 'number', placeholder: '0.00' },
-    { id: 'add-book-fee-input', label: 'Fee', name: 'fee', type: 'number', placeholder: '0.00' },
+    {
+      id: 'add-book-price-input',
+      label: 'Price',
+      name: 'price',
+      type: 'number',
+      placeholder: '0.00',
+      min: '0.01',
+      step: '0.01',
+      onKeyDown: preventNegativeKeys
+    },
+    {
+      id: 'add-book-fee-input',
+      label: 'Fee',
+      name: 'fee',
+      type: 'number',
+      placeholder: '0.00',
+      min: '0.01',
+      step: '0.01',
+      onKeyDown: preventNegativeKeys
+    },
     { id: 'add-book-copies-input', label: 'Number of Copies', name: 'numberOfCopies', type: 'number', placeholder: '1' },
   ];
 
@@ -169,6 +206,9 @@ export default function BooksPage() {
               label={field.label}
               type={field.type}
               placeholder={field.placeholder}
+              min={field.min}
+              step={field.step}
+              onKeyDown={field.onKeyDown}
               error={errors[field.name]?.message}
               {...register(field.name, validationRules[field.name])}
             />
