@@ -4,12 +4,8 @@ import { getLoanLimits } from "../config/loanLimits.js";
 import AppError from "../utils/AppError.js";
 import { getUserBudget } from "./users.service.js";
 
-export const createLoan = async ({ bookId, borrowerId }) => {
-  // Get the borrower's role to determine their loan limits
-  const borrower = await User.findByPk(borrowerId);
-  if (!borrower) throw new AppError("Borrower not found", 404);
-
-  const loanLimits = getLoanLimits(borrower.roleId);
+export const createLoan = async ({ bookId, borrowerId, borrowerRoleId }) => {
+  const loanLimits = getLoanLimits(borrowerRoleId);
 
   const activeLoans = await Loan.count({ where: { borrowerId, returnDate: null } });
   if (activeLoans >= loanLimits.maxActiveLoans) {

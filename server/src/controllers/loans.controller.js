@@ -8,7 +8,7 @@ export const borrowBook = async (req, res) => {
   if (bookId == null) throw new AppError("bookId is required", 400);
 
   const parsedBookId = parsePositiveInt(bookId, "bookId");
-  const loan = await createLoan({ bookId: parsedBookId, borrowerId: req.user.id });
+  const loan = await createLoan({ bookId: parsedBookId, borrowerId: req.user.id, borrowerRoleId: req.user.roleId });
   return res.status(201).json(loan);
 };
 
