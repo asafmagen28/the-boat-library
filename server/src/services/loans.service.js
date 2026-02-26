@@ -1,13 +1,19 @@
 import { sequelize, Loan, Copy, Book, Author, Transaction, User } from "../models/index.js";
 import { getStatus, getTransactionType } from "../utils/lookupCache.js";
-import { BORROW_MAX_DAYS, MAX_ACTIVE_LOANS } from "../constants/loans.js";
+import { getLoanLimits } from "../config/loanLimits.js";
 import AppError from "../utils/AppError.js";
 import { getUserBudget } from "./users.service.js";
 
 export const createLoan = async ({ bookId, borrowerId }) => {
+  // Get the borrower's role to determine their loan limits
+  const borrower = await User.findByPk(borrowerId);
+  if (!borrower) throw new AppError("Borrower not found", 404);
+
+  const loanLimits = getLoanLimits(borrower.roleId);
+
   const activeLoans = await Loan.count({ where: { borrowerId, returnDate: null } });
-  if (activeLoans >= MAX_ACTIVE_LOANS) {
-    throw new AppError(`Loan limit reached (max ${MAX_ACTIVE_LOANS} active loans)`, 400);
+  if (activeLoans >= loanLimits.maxActiveLoans) {
+    throw new AppError(`Loan limit reached (max ${loanLimits.maxActiveLoans} active loans)`, 400);
   }
 
   const budget = await getUserBudget(borrowerId);
@@ -29,7 +35,7 @@ export const createLoan = async ({ bookId, borrowerId }) => {
 
   const now = new Date();
   const deadLineDate = new Date(now);
-  deadLineDate.setDate(deadLineDate.getDate() + BORROW_MAX_DAYS);
+  deadLineDate.setDate(deadLineDate.getDate() + loanLimits.borrowDays);
 
   const dbTransaction = await sequelize.transaction();
   try {
