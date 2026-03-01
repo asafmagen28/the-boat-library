@@ -1,0 +1,51 @@
+@use '../../styles/variables' as *;
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.loanItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-md;
+  background: $bg-white;
+  border: 1px solid $border-color;
+  border-radius: $radius-md;
+}
+
+.loanInfo {
+  flex: 1;
+}
+
+.bookTitle {
+  font-size: $font-size-lg;
+  font-weight: 600;
+  color: $text-primary;
+  margin: 0 0 $spacing-xs 0;
+}
+
+.detail {
+  font-size: $font-size-sm;
+  color: $text-secondary;
+  margin: 0;
+}
+
+.badge {
+  padding: $spacing-xs $spacing-sm;
+  border-radius: $radius-sm;
+  font-size: $font-size-sm;
+  font-weight: 500;
+}
+
+.active {
+  background-color: rgba($success, 0.1);
+  color: $success;
+}
+
+.returned {
+  background-color: rgba($text-muted, 0.1);
+  color: $text-muted;
+}

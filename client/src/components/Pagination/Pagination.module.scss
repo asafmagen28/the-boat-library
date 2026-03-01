@@ -1,0 +1,41 @@
+@use '../../styles/variables' as *;
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: $spacing-xs;
+  margin-top: $spacing-xl;
+}
+
+.button {
+  padding: $spacing-sm $spacing-md;
+  border: 1px solid $border-color;
+  border-radius: $radius-sm;
+  background: $bg-white;
+  color: $text-primary;
+  font-size: $font-size-sm;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s;
+
+  &:hover:not(:disabled) {
+    background: $bg-light;
+    border-color: $border-dark;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &.active {
+    background: $primary;
+    color: $text-white;
+    border-color: $primary;
+  }
+}
+
+.ellipsis {
+  padding: $spacing-sm $spacing-xs;
+  color: $text-muted;
+}

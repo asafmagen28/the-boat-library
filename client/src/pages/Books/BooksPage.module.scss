@@ -1,0 +1,53 @@
+@use '../../styles/variables' as *;
+
+.toolbar {
+  margin-bottom: $spacing-lg;
+}
+
+.form {
+  max-width: 500px;
+  margin-bottom: $spacing-xl;
+  padding: $spacing-lg;
+  background: $bg-white;
+  border: 1px solid $border-color;
+  border-radius: $radius-md;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.selectGroup {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+
+  label {
+    font-weight: 600;
+    font-size: $font-size-sm;
+    color: $text-primary;
+  }
+}
+
+.select {
+  padding: $spacing-sm;
+  border: 1px solid $border-color;
+  border-radius: $radius-sm;
+  font-size: $font-size-base;
+}
+
+.error {
+  color: $danger;
+  font-size: $font-size-sm;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: $spacing-lg;
+  transition: opacity 0.2s;
+
+  &.loading {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+}

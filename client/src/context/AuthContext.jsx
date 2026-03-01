@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback } from 'react';
 import { authAPI } from '../services/api';
 
 const AuthContext = createContext(null);
@@ -14,19 +14,15 @@ function decodeToken(token) {
 }
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
+  const [user, setUser] = useState(() => {
     const token = localStorage.getItem('token');
     if (token) {
       const decoded = decodeToken(token);
-      if (decoded) {
-        setUser(decoded);
-      } else {
-        localStorage.removeItem('token');
-      }
+      if (!decoded) localStorage.removeItem('token');
+      return decoded;
     }
-  }, []);
+    return null;
+  });
 
   const login = useCallback(async (username, password) => {
     const { data } = await authAPI.login(username, password);

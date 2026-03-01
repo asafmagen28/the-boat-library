@@ -7,7 +7,6 @@ import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 import PublicRoute from './components/PublicRoute/PublicRoute';
 
 import HomePage from './pages/Home/HomePage';
-import AccessDeniedPage from './pages/AccessDenied/AccessDenied';
 import LoginPage from './pages/Login/LoginPage';
 import RegisterPage from './pages/Register/RegisterPage';
 import BooksPage from './pages/Books/BooksPage';
@@ -55,7 +54,6 @@ export default function App() {
         </Route>
       </Route>
 
-      <Route path='/access-denied' element={<AccessDeniedPage/>} />
       <Route path="*" element={<NotFoundPage />} />
 
     </Routes>

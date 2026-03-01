@@ -1,9 +1,9 @@
 import bcrypt from "bcryptjs";
 import { sequelize, User, Role, EmployeeCode } from "../models/index.js";
 import { Op } from "sequelize";
+import AppError from "../utils/AppError.js";
 
 export const loginUser = async ({ username, password }) => {
-  
   const user = await User.scope(null).findOne({
     where: { username },
     include: {
@@ -12,18 +12,10 @@ export const loginUser = async ({ username, password }) => {
     },
   });
 
-  if (!user) {
-    const err = new Error("Invalid credentials");
-    err.status = 401;
-    throw err;
-  }
+  if (!user) throw new AppError("Invalid credentials", 401);
 
   const isMatch = await user.comparePassword(password);
-  if (!isMatch) {
-    const err = new Error("Invalid credentials");
-    err.status = 401;
-    throw err;
-  }  
+  if (!isMatch) throw new AppError("Invalid credentials", 401);
 
   return { user };
 };
@@ -32,13 +24,11 @@ export const registerUser = async ({ username, password, employeeCode }) => {
   const user = await User.findOne({ where: { username }, paranoid: false });
   let foundCode = null;
 
-  if (user) {
-    const err = new Error("User already exists");
-    err.status = 409;
-    throw err;
-  }
+  if (user) throw new AppError("User already exists", 409);
 
   if (employeeCode) {
+    // Bcrypt hashes can't be queried by value, so we fetch available codes
+    // and compare each one.
     const availableEmployeeCodes = await EmployeeCode.findAll({
       where: {
         isUsed: false,
@@ -53,21 +43,13 @@ export const registerUser = async ({ username, password, employeeCode }) => {
       }
     }
 
-    if (!foundCode) {
-      const err = new Error("Invalid or expired employee code");
-      err.status = 400;
-      throw err;
-    }
+    if (!foundCode) throw new AppError("Invalid or expired employee code", 400);
   }
 
   const roleName = employeeCode ? "employee" : "customer";
   const role = await Role.findOne({ where: { roleName } });
 
-  if (!role) {
-    const err = new Error("Role configuration error");
-    err.status = 500;
-    throw err;
-  }
+  if (!role) throw new AppError("Role configuration error", 500);
 
   const transaction = await sequelize.transaction();
   try {
