@@ -32,3 +32,14 @@
   color: $text-secondary;
   margin: 0;
 }
+
+.overdueBadge {
+  display: inline-block;
+  margin-left: $spacing-sm;
+  padding: $spacing-xs $spacing-sm;
+  border-radius: $radius-sm;
+  font-size: $font-size-sm;
+  font-weight: 500;
+  background-color: rgba($danger, 0.1);
+  color: $danger;
+}
