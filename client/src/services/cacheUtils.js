@@ -12,6 +12,7 @@ export const QUERY_KEYS = {
   loans: ['loans'],
   myLoans: ['myLoans'],
   customers: ['customers'],
+  bestSellers: ['bestSellers'],
 };
 
 /**
