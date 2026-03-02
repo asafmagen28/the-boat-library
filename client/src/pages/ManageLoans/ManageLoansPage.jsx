@@ -34,8 +34,7 @@ export default function ManageLoansPage() {
 
       <div className={styles.list}>
         {loans.map((loan) => {
-          const todayStr = new Date().toLocaleDateString('en-CA');
-          const isOverdue = loan.deadLineDate < todayStr;
+          const { isOverdue } = loan;
 
           return (
           <div key={loan.id} id={`loan-item-${loan.id}`} className={styles.loanItem}>

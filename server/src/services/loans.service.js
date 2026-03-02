@@ -92,7 +92,7 @@ export const returnLoan = async ({ loanId }) => {
 };
 
 export const getAllLoans = async () => {
-  return await Loan.findAll(
+  const loans = await Loan.findAll(
     {
       include: [
         { model: User, as: 'borrower' },
@@ -109,6 +109,12 @@ export const getAllLoans = async () => {
       where: { returnDate: null },
       order: [["loanDate", "DESC"]],
     });
+
+  const today = new Date().toISOString().split('T')[0];
+  return loans.map(loan => ({
+    ...loan.toJSON(),
+    isOverdue: loan.deadLineDate < today,
+  }));
 };
 
 export const getMyLoans = async (borrowerId) => {
