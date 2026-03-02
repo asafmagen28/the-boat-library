@@ -22,6 +22,12 @@
   gap: $spacing-xs;
 }
 
+.nameRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
 .username {
   font-size: $font-size-lg;
   font-weight: 500;
@@ -31,4 +37,78 @@
 .date {
   font-size: $font-size-sm;
   color: $text-secondary;
+}
+
+.budget {
+  font-size: $font-size-lg;
+  font-weight: 600;
+}
+
+.budgetPositive {
+  color: $success;
+}
+
+.budgetNegative {
+  color: $danger;
+}
+
+.actions {
+  display: flex;
+  gap: $spacing-sm;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: $bg-white;
+  border-radius: $radius-md;
+  padding: $spacing-xl;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: $shadow-lg;
+}
+
+.modalTitle {
+  margin: 0 0 $spacing-md;
+  color: $text-primary;
+  font-size: $font-size-xl;
+}
+
+.modalMessage {
+  margin: 0 0 $spacing-md;
+  color: $text-secondary;
+  font-size: $font-size-base;
+  line-height: 1.5;
+}
+
+.amountInput {
+  width: 100%;
+  padding: $spacing-sm $spacing-md;
+  border: 1px solid $border-dark;
+  border-radius: $radius-md;
+  font-size: $font-size-base;
+  margin-bottom: $spacing-xl;
+  box-sizing: border-box;
+
+  &:focus {
+    outline: none;
+    border-color: $primary-light;
+  }
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: $spacing-sm;
 }

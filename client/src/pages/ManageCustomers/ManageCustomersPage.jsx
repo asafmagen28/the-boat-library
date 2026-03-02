@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useToast } from '../../context/ToastContext';
-import { useCustomers, useDeleteUser } from '../../services/users.api';
+import { useCustomers, useDeleteUser, useAddBalance } from '../../services/users.api';
 import PageHeader from '../../components/PageHeader/PageHeader';
 import Button from '../../components/Button/Button';
 import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
@@ -11,6 +11,8 @@ export default function ManageCustomersPage() {
   const { showToast } = useToast();
   const { data: customers = [], isLoading, error } = useCustomers();
   const [customerToDelete, setCustomerToDelete] = useState(null);
+  const [customerToLoad, setCustomerToLoad] = useState(null);
+  const [depositAmount, setDepositAmount] = useState('');
 
   const deleteUser = useDeleteUser({
     onSuccess: () => {
@@ -19,6 +21,17 @@ export default function ManageCustomersPage() {
     },
     onError: (error) => {
       setCustomerToDelete(null);
+      showToast(error.message, 'error');
+    },
+  });
+
+  const addBalance = useAddBalance({
+    onSuccess: () => {
+      setCustomerToLoad(null);
+      setDepositAmount('');
+      showToast('Funds loaded successfully', 'success');
+    },
+    onError: (error) => {
       showToast(error.message, 'error');
     },
   });
@@ -33,6 +46,22 @@ export default function ManageCustomersPage() {
     }
   };
 
+  const handleLoadFundsClick = (customer) => {
+    setCustomerToLoad(customer);
+    setDepositAmount('');
+  };
+
+  const handleConfirmDeposit = () => {
+    if (customerToLoad && depositAmount) {
+      addBalance.mutate({ userId: customerToLoad.id, amount: parseFloat(depositAmount) });
+    }
+  };
+
+  const handleCancelDeposit = () => {
+    setCustomerToLoad(null);
+    setDepositAmount('');
+  };
+
   if (isLoading) return <p>Loading customers...</p>;
   if (error) return <p id="manage-customers-error">Error: {error.message}</p>;
 
@@ -44,16 +73,30 @@ export default function ManageCustomersPage() {
         {customers.map((customer) => (
           <div key={customer.id} id={`customer-item-${customer.id}`} className={styles.customerItem}>
             <div className={styles.customerInfo}>
-              <span className={styles.username}>{customer.username}</span>
+              <div className={styles.nameRow}>
+                <span className={styles.username}>{customer.username}</span>
+                <span className={`${styles.budget} ${Number(customer.budget) >= 0 ? styles.budgetPositive : styles.budgetNegative}`}>
+                  ₪{Number(customer.budget).toFixed(2)}
+                </span>
+              </div>
               <span className={styles.date}>Joined: {new Date(customer.createdAt).toLocaleDateString()}</span>
             </div>
-            <Button
-              id={`customer-delete-btn-${customer.id}`}
-              variant="danger"
-              onClick={() => handleDeleteClick(customer)}
-            >
-              Delete
-            </Button>
+            <div className={styles.actions}>
+              <Button
+                id={`customer-load-funds-btn-${customer.id}`}
+                variant="secondary"
+                onClick={() => handleLoadFundsClick(customer)}
+              >
+                Load Funds
+              </Button>
+              <Button
+                id={`customer-delete-btn-${customer.id}`}
+                variant="danger"
+                onClick={() => handleDeleteClick(customer)}
+              >
+                Delete
+              </Button>
+            </div>
           </div>
         ))}
       </div>
@@ -70,6 +113,42 @@ export default function ManageCustomersPage() {
         onConfirm={handleConfirmDelete}
         onCancel={() => setCustomerToDelete(null)}
       />
+
+      {customerToLoad && (
+        <div id="load-funds-modal" className={styles.overlay} onClick={handleCancelDeposit}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <h3 className={styles.modalTitle}>Load Funds</h3>
+            <p className={styles.modalMessage}>
+              Add funds to <strong>{customerToLoad.username}</strong>'s account.
+              Current balance: <strong className={Number(customerToLoad.budget) >= 0 ? styles.budgetPositive : styles.budgetNegative}>₪{Number(customerToLoad.budget).toFixed(2)}</strong>
+            </p>
+            <input
+              id="load-funds-amount-input"
+              className={styles.amountInput}
+              type="number"
+              min="0.01"
+              max="10000"
+              step="0.01"
+              placeholder="Enter amount (₪)"
+              value={depositAmount}
+              onChange={(e) => setDepositAmount(e.target.value)}
+            />
+            <div className={styles.modalActions}>
+              <Button id="load-funds-cancel-btn" variant="outline" onClick={handleCancelDeposit}>
+                Cancel
+              </Button>
+              <Button
+                id="load-funds-confirm-btn"
+                variant="primary"
+                onClick={handleConfirmDeposit}
+                disabled={!depositAmount || parseFloat(depositAmount) <= 0}
+              >
+                Confirm
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
