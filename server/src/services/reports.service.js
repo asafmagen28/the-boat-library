@@ -7,7 +7,7 @@ export const getAuthorPayments = async () => {
       'firstName',
       'surname',
       [sequelize.fn('COUNT', sequelize.col('books.copies.loans.id')), 'loanCount'],
-      [sequelize.fn('SUM', sequelize.col('books.copies.loans.fee')), 'totalPayment'],
+      [sequelize.fn('COALESCE', sequelize.fn('SUM', sequelize.col('books.copies.loans.fee')), 0), 'totalPayment'],
     ],
     include: [{
       model: Book,
