@@ -1,15 +1,7 @@
 import PageHeader from '../../components/PageHeader/PageHeader';
 import { useMyBudget, useMyTransactions } from '../../services/users.api';
+import { formatAmount, formatDate } from '../../utils/formatters';
 import styles from './BudgetPage.module.scss';
-
-function formatDate(dateString) {
-  return new Date(dateString).toLocaleDateString();
-}
-
-function formatAmount(amount) {
-  const prefix = amount >= 0 ? '+' : '-';
-  return `${prefix} ₪${Math.abs(amount).toFixed(2)}`;
-}
 
 function getTransactionLabel(transaction) {
   if (transaction.transactionType?.type === 'deposit') return 'Deposit';
