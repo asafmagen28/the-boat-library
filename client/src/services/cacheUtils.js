@@ -14,6 +14,8 @@ export const QUERY_KEYS = {
   customers: ['customers'],
   bestSellers: ['bestSellers'],
   authorPayments: ['authorPayments'],
+  myBudget: ['myBudget'],
+  myTransactions: ['myTransactions'],
 };
 
 /**

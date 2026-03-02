@@ -10,6 +10,38 @@ export const useCustomers = (options = {}) => {
   });
 };
 
+export const useMyBudget = (options = {}) => {
+  return useQuery({
+    queryKey: QUERY_KEYS.myBudget,
+    queryFn: () => api.get('/users/me/budget').then((res) => res.data),
+    ...options,
+  });
+};
+
+export const useMyTransactions = (options = {}) => {
+  return useQuery({
+    queryKey: QUERY_KEYS.myTransactions,
+    queryFn: () => api.get('/users/me/transactions').then((res) => res.data),
+    ...options,
+  });
+};
+
+export const useAddBalance = ({ onSuccess, onError, ...rest } = {}) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ userId, amount }) => api.patch(`/users/${userId}/balance`, { amount }),
+    onSuccess: (data, variables, context) => {
+      invalidateQueries(queryClient, [QUERY_KEYS.customers]);
+      onSuccess?.(data, variables, context);
+    },
+    onError: (error, variables, context) => {
+      onError?.(error, variables, context);
+    },
+    ...rest,
+  });
+};
+
 export const useDeleteUser = ({ onSuccess, onError, onMutate, ...restOptions } = {}) => {
   const queryClient = useQueryClient();
 
