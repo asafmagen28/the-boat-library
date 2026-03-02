@@ -9,3 +9,11 @@ export const useBestSellers = (options = {}) => {
     ...options,
   });
 };
+
+export const useAuthorPayments = (options = {}) => {
+  return useQuery({
+    queryKey: QUERY_KEYS.authorPayments,
+    queryFn: () => api.get('/reports/author-payments').then((res) => res.data),
+    ...options,
+  });
+};
