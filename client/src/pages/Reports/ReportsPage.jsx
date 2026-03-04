@@ -7,7 +7,11 @@ import styles from './ReportsPage.module.scss';
 export default function ReportsPage() {
   const [activeReport, setActiveReport] = useState('best-sellers');
 
-  const { data: books = [], isLoading: bsLoading, error: bsError } = useBestSellers();
+  const {
+    data: books = [],
+    isLoading: bsLoading,
+    error: bsError,
+  } = useBestSellers({ enabled: activeReport === 'best-sellers' });
   const {
     data: authors = [],
     isLoading: apLoading,
@@ -58,7 +62,7 @@ export default function ReportsPage() {
                     </span>
                   </div>
                   <span id={`best-seller-count-${book.id}`} className={styles.loanCount}>
-                    {parseInt(book.loanCount, 10)} loans
+                    {book.loanCount} loans
                   </span>
                 </li>
               ))}
@@ -89,10 +93,10 @@ export default function ReportsPage() {
                     </span>
                   </div>
                   <span id={`author-payment-loans-${author.id}`} className={styles.loanCount}>
-                    {parseInt(author.loanCount, 10) || 0} loans
+                    {author.loanCount} loans
                   </span>
                   <span id={`author-payment-amount-${author.id}`} className={styles.paymentAmount}>
-                    ₪{parseFloat(author.totalPayment || 0).toFixed(2)}
+                    ₪{author.totalPayment.toFixed(2)}
                   </span>
                 </li>
               ))}

@@ -16,8 +16,25 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    const message = error.response?.data?.error || 'Something went wrong';
-    return Promise.reject(new Error(message));
+    const status = error.response?.status;
+    const responseData = error.response?.data;
+    const serverError = responseData?.error;
+    const serverMessage = responseData?.message;
+    const fallbackMessage = error.code === 'ERR_NETWORK' ? 'Network Error' : 'Something went wrong';
+
+    const message =
+      (typeof serverError === 'string' && serverError.trim()) ||
+      (typeof serverMessage === 'string' && serverMessage.trim()) ||
+      fallbackMessage;
+
+    const normalizedError = new Error(message);
+    normalizedError.status = status;
+    normalizedError.code = error.code;
+    normalizedError.data = responseData;
+    normalizedError.isNetworkError = !error.response;
+    normalizedError.originalError = error;
+
+    return Promise.reject(normalizedError);
   }
 );
 

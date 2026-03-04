@@ -7,6 +7,7 @@ import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
 import EmptyState from '../../components/EmptyState/EmptyState';
 import LoadFundsModal from './LoadFundsModal';
 import { formatBalance, formatDate } from '../../utils/formatters';
+import { getUserFriendlyErrorMessage } from '../../utils/errorMessages';
 import styles from './ManageCustomersPage.module.scss';
 
 export default function ManageCustomersPage() {
@@ -22,7 +23,7 @@ export default function ManageCustomersPage() {
     },
     onError: (error) => {
       setCustomerToDelete(null);
-      showToast(error.message, 'error');
+      showToast(getUserFriendlyErrorMessage(error, 'Failed to delete customer. Please try again.'), 'error');
     },
   });
 
@@ -32,7 +33,7 @@ export default function ManageCustomersPage() {
       showToast('Funds loaded successfully', 'success');
     },
     onError: (error) => {
-      showToast(error.message, 'error');
+      showToast(getUserFriendlyErrorMessage(error, 'Failed to load funds. Please try again.'), 'error');
     },
   });
 
@@ -47,7 +48,7 @@ export default function ManageCustomersPage() {
   };
 
   if (isLoading) return <p>Loading customers...</p>;
-  if (error) return <p id="manage-customers-error">Error: {error.message}</p>;
+  if (error) return <p id="manage-customers-error">Error: {getUserFriendlyErrorMessage(error, 'Failed to load customers. Please try again.')}</p>;
 
   return (
     <section id="manage-customers-page">
@@ -103,6 +104,7 @@ export default function ManageCustomersPage() {
           customer={customerToLoad}
           onConfirm={handleConfirmDeposit}
           onCancel={() => setCustomerToLoad(null)}
+          isLoading={addBalance.isPending}
         />
       )}
     </section>

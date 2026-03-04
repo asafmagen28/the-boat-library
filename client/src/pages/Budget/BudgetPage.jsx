@@ -3,10 +3,19 @@ import { useMyBudget, useMyTransactions } from '../../services/users.api';
 import { formatAmount, formatDate } from '../../utils/formatters';
 import styles from './BudgetPage.module.scss';
 
+const TRANSACTION_TYPES = {
+  DEPOSIT: 'deposit',
+  BORROW_CHARGE: 'borrow_charge',
+};
+
+const TRANSACTION_LABELS = {
+  [TRANSACTION_TYPES.DEPOSIT]: 'Deposit',
+  [TRANSACTION_TYPES.BORROW_CHARGE]: 'Book Charge',
+};
+
 function getTransactionLabel(transaction) {
-  if (transaction.transactionType?.type === 'deposit') return 'Deposit';
-  if (transaction.transactionType?.type === 'borrow_charge') return 'Book Charge';
-  return transaction.transactionType?.type ?? 'Transaction';
+  const type = transaction.transactionType?.type;
+  return TRANSACTION_LABELS[type] ?? type ?? 'Transaction';
 }
 
 export default function BudgetPage() {
