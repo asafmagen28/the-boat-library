@@ -12,6 +12,12 @@ export default function LoadFundsModal({ customer, onConfirm, onCancel, isLoadin
     setDepositAmount('');
   }, [customer?.id]);
 
+  const preventNegativeKeys = (e) => {
+    if (e.key === '-') {
+      e.preventDefault();
+    }
+  };
+
   const handleConfirm = () => {
     if (isValidAmount && !isLoading) {
       onConfirm(parsedAmount);
@@ -39,6 +45,7 @@ export default function LoadFundsModal({ customer, onConfirm, onCancel, isLoadin
           placeholder="Enter amount (₪)"
           value={depositAmount}
           onChange={(e) => setDepositAmount(e.target.value)}
+          onKeyDown={preventNegativeKeys}
           disabled={isLoading}
         />
         <div className={styles.modalActions}>
