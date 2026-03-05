@@ -1,0 +1,97 @@
+@use '../../styles/variables' as *;
+
+.balanceCard {
+  background: $bg-white;
+  border: 1px solid $border-color;
+  border-radius: $radius-lg;
+  padding: $spacing-xl;
+  margin-bottom: $spacing-xl;
+  text-align: center;
+  box-shadow: $shadow-md;
+}
+
+.balanceLabel {
+  font-size: $font-size-lg;
+  color: $text-secondary;
+  margin: 0 0 $spacing-sm;
+}
+
+.balanceAmount {
+  font-size: $font-size-3xl;
+  font-weight: 700;
+  margin: 0;
+}
+
+.balancePositive {
+  color: $success;
+}
+
+.balanceNegative {
+  color: $danger;
+}
+
+.sectionTitle {
+  font-size: $font-size-xl;
+  color: $text-primary;
+  margin: 0 0 $spacing-md;
+}
+
+.emptyState {
+  color: $text-muted;
+  font-size: $font-size-base;
+}
+
+.transactionList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.transactionItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-md;
+  background: $bg-white;
+  border: 1px solid $border-color;
+  border-radius: $radius-md;
+}
+
+.transactionMeta {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.transactionType {
+  font-size: $font-size-base;
+  font-weight: 500;
+  color: $text-primary;
+}
+
+.bookTitle {
+  font-size: $font-size-sm;
+  color: $text-secondary;
+  font-style: italic;
+}
+
+.transactionDate {
+  font-size: $font-size-sm;
+  color: $text-muted;
+}
+
+.transactionAmount {
+  font-size: $font-size-lg;
+  font-weight: 600;
+}
+
+.amountPositive {
+  color: $success;
+}
+
+.amountNegative {
+  color: $danger;
+}

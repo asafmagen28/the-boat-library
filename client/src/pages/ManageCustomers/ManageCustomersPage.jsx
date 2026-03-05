@@ -1,16 +1,20 @@
 import { useState } from 'react';
 import { useToast } from '../../context/ToastContext';
-import { useCustomers, useDeleteUser } from '../../services/users.api';
+import { useCustomers, useDeleteUser, useAddBalance } from '../../services/users.api';
 import PageHeader from '../../components/PageHeader/PageHeader';
 import Button from '../../components/Button/Button';
 import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
 import EmptyState from '../../components/EmptyState/EmptyState';
+import LoadFundsModal from './LoadFundsModal';
+import { formatBalance, formatDate } from '../../utils/formatters';
+import { getUserFriendlyErrorMessage } from '../../utils/errorMessages';
 import styles from './ManageCustomersPage.module.scss';
 
 export default function ManageCustomersPage() {
   const { showToast } = useToast();
   const { data: customers = [], isLoading, error } = useCustomers();
   const [customerToDelete, setCustomerToDelete] = useState(null);
+  const [customerToLoad, setCustomerToLoad] = useState(null);
 
   const deleteUser = useDeleteUser({
     onSuccess: () => {
@@ -19,13 +23,19 @@ export default function ManageCustomersPage() {
     },
     onError: (error) => {
       setCustomerToDelete(null);
-      showToast(error.message, 'error');
+      showToast(getUserFriendlyErrorMessage(error, 'Failed to delete customer. Please try again.'), 'error');
     },
   });
 
-  const handleDeleteClick = (customer) => {
-    setCustomerToDelete(customer);
-  };
+  const addBalance = useAddBalance({
+    onSuccess: () => {
+      setCustomerToLoad(null);
+      showToast('Funds loaded successfully', 'success');
+    },
+    onError: (error) => {
+      showToast(getUserFriendlyErrorMessage(error, 'Failed to load funds. Please try again.'), 'error');
+    },
+  });
 
   const handleConfirmDelete = () => {
     if (customerToDelete) {
@@ -33,8 +43,12 @@ export default function ManageCustomersPage() {
     }
   };
 
+  const handleConfirmDeposit = (amount) => {
+    addBalance.mutate({ userId: customerToLoad.id, amount });
+  };
+
   if (isLoading) return <p>Loading customers...</p>;
-  if (error) return <p id="manage-customers-error">Error: {error.message}</p>;
+  if (error) return <p id="manage-customers-error">Error: {getUserFriendlyErrorMessage(error, 'Failed to load customers. Please try again.')}</p>;
 
   return (
     <section id="manage-customers-page">
@@ -44,16 +58,30 @@ export default function ManageCustomersPage() {
         {customers.map((customer) => (
           <div key={customer.id} id={`customer-item-${customer.id}`} className={styles.customerItem}>
             <div className={styles.customerInfo}>
-              <span className={styles.username}>{customer.username}</span>
-              <span className={styles.date}>Joined: {new Date(customer.createdAt).toLocaleDateString()}</span>
+              <div className={styles.nameRow}>
+                <span className={styles.username}>{customer.username}</span>
+                <span className={`${styles.budget} ${Number(customer.budget) >= 0 ? styles.budgetPositive : styles.budgetNegative}`}>
+                  {formatBalance(customer.budget)}
+                </span>
+              </div>
+              <span className={styles.date}>Joined: {formatDate(customer.createdAt)}</span>
             </div>
-            <Button
-              id={`customer-delete-btn-${customer.id}`}
-              variant="danger"
-              onClick={() => handleDeleteClick(customer)}
-            >
-              Delete
-            </Button>
+            <div className={styles.actions}>
+              <Button
+                id={`customer-load-funds-btn-${customer.id}`}
+                variant="secondary"
+                onClick={() => setCustomerToLoad(customer)}
+              >
+                Load Funds
+              </Button>
+              <Button
+                id={`customer-delete-btn-${customer.id}`}
+                variant="danger"
+                onClick={() => setCustomerToDelete(customer)}
+              >
+                Delete
+              </Button>
+            </div>
           </div>
         ))}
       </div>
@@ -70,6 +98,15 @@ export default function ManageCustomersPage() {
         onConfirm={handleConfirmDelete}
         onCancel={() => setCustomerToDelete(null)}
       />
+
+      {customerToLoad && (
+        <LoadFundsModal
+          customer={customerToLoad}
+          onConfirm={handleConfirmDeposit}
+          onCancel={() => setCustomerToLoad(null)}
+          isLoading={addBalance.isPending}
+        />
+      )}
     </section>
   );
 }

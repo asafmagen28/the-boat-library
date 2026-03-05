@@ -22,6 +22,12 @@
   gap: $spacing-xs;
 }
 
+.nameRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
 .username {
   font-size: $font-size-lg;
   font-weight: 500;
@@ -32,3 +38,22 @@
   font-size: $font-size-sm;
   color: $text-secondary;
 }
+
+.budget {
+  font-size: $font-size-lg;
+  font-weight: 600;
+}
+
+.budgetPositive {
+  color: $success;
+}
+
+.budgetNegative {
+  color: $danger;
+}
+
+.actions {
+  display: flex;
+  gap: $spacing-sm;
+}
+

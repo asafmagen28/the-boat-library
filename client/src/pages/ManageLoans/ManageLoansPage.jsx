@@ -33,14 +33,24 @@ export default function ManageLoansPage() {
       <PageHeader id="manage-loans-page-header" title="Manage Loans" subtitle="Process loans and returns" />
 
       <div className={styles.list}>
-        {loans.map((loan) => (
+        {loans.map((loan) => {
+          const { isOverdue } = loan;
+
+          return (
           <div key={loan.id} id={`loan-item-${loan.id}`} className={styles.loanItem}>
             <div className={styles.loanInfo}>
               <h3 className={styles.bookTitle}>{loan.copy?.book?.title}</h3>
               <p className={styles.detail}>
                 Author: {loan.copy?.book?.author?.firstName} {loan.copy?.book?.author?.surname}
               </p>
-              <p className={styles.detail}>Borrower: {loan.borrower?.username}</p>
+              <p className={styles.detail}>
+                Borrower: {loan.borrower?.username}
+                {isOverdue && (
+                  <span id={`loan-overdue-badge-${loan.id}`} className={styles.overdueBadge}>
+                    Overdue
+                  </span>
+                )}
+              </p>
               <p className={styles.detail}>Loan Date: {loan.loanDate}</p>
               <p className={styles.detail}>Deadline: {loan.deadLineDate}</p>
             </div>
@@ -53,7 +63,8 @@ export default function ManageLoansPage() {
               Return
             </Button>
           </div>
-        ))}
+          );
+        })}
       </div>
 
       {loans.length === 0 && <EmptyState id="manage-loans-empty-state" message="No active loans." icon="📚" />}
