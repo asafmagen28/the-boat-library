@@ -14,6 +14,11 @@ export default function ListControls({
     const initialSearch = searchParams.get('search') || '';
     const [searchTerm, setSearchTerm] = useState(initialSearch);
 
+    // Sync local state with URL changes from navigation, etc.
+    useEffect(() => {
+        setSearchTerm(initialSearch);
+    }, [initialSearch]);
+
     const sortBy = searchParams.get('sortBy') || defaultSortBy;
     const sortOrder = searchParams.get('sortOrder') || defaultSortOrder;
 

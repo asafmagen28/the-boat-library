@@ -1,1 +1,1 @@
-// Custom hooks barrel export — hooks will be added in future phases
+export { default as useListParams } from './useListParams';

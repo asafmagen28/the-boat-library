@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useListParams } from '../../hooks';
 import { useToast } from '../../context/ToastContext';
 import { useCustomers, useDeleteUser, useAddBalance } from '../../services/users.api';
 import PageHeader from '../../components/PageHeader/PageHeader';
@@ -15,11 +15,7 @@ import styles from './ManageCustomersPage.module.scss';
 
 export default function ManageCustomersPage() {
   const { showToast } = useToast();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const page = Number(searchParams.get('page')) || 1;
-  const search = searchParams.get('search') || '';
-  const sortBy = searchParams.get('sortBy') || 'username';
-  const sortOrder = searchParams.get('sortOrder') || 'ASC';
+  const { page, search, sortBy, sortOrder, handlePageChange } = useListParams('username', 'ASC');
 
   const { data, isLoading, error, isPlaceholderData } = useCustomers({ page, search, sortBy, sortOrder });
   const customers = data?.customers ?? [];
@@ -60,15 +56,6 @@ export default function ManageCustomersPage() {
     addBalance.mutate({ userId: customerToLoad.id, amount });
   };
 
-  const handlePageChange = (newPage) => {
-    const newParams = new URLSearchParams(searchParams);
-    if (newPage === 1) {
-      newParams.delete('page');
-    } else {
-      newParams.set('page', String(newPage));
-    }
-    setSearchParams(newParams);
-  };
 
   if (isLoading) return <p>Loading customers...</p>;
   if (error) return <p id="manage-customers-error">Error: {getUserFriendlyErrorMessage(error, 'Failed to load customers. Please try again.')}</p>;

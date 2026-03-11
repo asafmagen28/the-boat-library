@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useListParams } from '../../hooks';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
@@ -25,11 +25,7 @@ export default function BooksPage() {
   const [activeModal, setActiveModal] = useState(null);
   const closeModal = () => setActiveModal(null);
 
-  const [searchParams, setSearchParams] = useSearchParams();
-  const page = Number(searchParams.get('page')) || 1;
-  const search = searchParams.get('search') || '';
-  const sortBy = searchParams.get('sortBy') || 'title';
-  const sortOrder = searchParams.get('sortOrder') || 'ASC';
+  const { page, search, sortBy, sortOrder, handlePageChange } = useListParams('title', 'ASC');
 
   const { register, handleSubmit, watch, reset: resetForm, formState: { errors, isValid } } = useForm({
     mode: 'onBlur',
@@ -178,15 +174,6 @@ export default function BooksPage() {
     });
   };
 
-  const handlePageChange = (newPage) => {
-    const newParams = new URLSearchParams(searchParams);
-    if (newPage === 1) {
-      newParams.delete('page');
-    } else {
-      newParams.set('page', String(newPage));
-    }
-    setSearchParams(newParams);
-  };
 
   if (isLoading) return <p>Loading books...</p>;
   if (error) return <p id="books-error">Error: {error.message}</p>;

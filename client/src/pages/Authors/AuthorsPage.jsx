@@ -8,7 +8,7 @@ import PageHeader from '../../components/PageHeader/PageHeader';
 import Button from '../../components/Button/Button';
 import FormInput from '../../components/FormInput/FormInput';
 import { NAME_REGEX } from '../../constants/validation';
-import { useSearchParams } from 'react-router-dom';
+import { useListParams } from '../../hooks';
 import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
 import EmptyState from '../../components/EmptyState/EmptyState';
 import ListControls from '../../components/ListControls/ListControls';
@@ -21,11 +21,7 @@ export default function AuthorsPage() {
   const [showForm, setShowForm] = useState(false);
   const [authorToDelete, setAuthorToDelete] = useState(null);
 
-  const [searchParams, setSearchParams] = useSearchParams();
-  const page = Number(searchParams.get('page')) || 1;
-  const search = searchParams.get('search') || '';
-  const sortBy = searchParams.get('sortBy') || 'surname';
-  const sortOrder = searchParams.get('sortOrder') || 'ASC';
+  const { page, search, sortBy, sortOrder, handlePageChange } = useListParams('surname', 'ASC');
 
   const { register, handleSubmit, reset: resetForm, formState: { errors, isValid } } = useForm({ mode: 'onBlur' });
 
@@ -76,15 +72,6 @@ export default function AuthorsPage() {
     addAuthor.mutate({ firstName: data.firstName.trim(), surname: data.surname.trim() });
   };
 
-  const handlePageChange = (newPage) => {
-    const newParams = new URLSearchParams(searchParams);
-    if (newPage === 1) {
-      newParams.delete('page');
-    } else {
-      newParams.set('page', String(newPage));
-    }
-    setSearchParams(newParams);
-  };
 
   if (isLoading) return <p>Loading authors...</p>;
   if (error) return <p id="authors-error">Error: {error.message}</p>;

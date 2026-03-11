@@ -5,6 +5,15 @@ import { QUERY_KEYS, invalidateQueries } from './cacheUtils';
 import { apiLogger } from '../utils/logger';
 import { TEMP_ID_PREFIX, PAGINATION } from '../constants/api';
 
+const findAuthorInCache = (queryClient, authorId) => {
+  const currentAuthorsList = queryClient.getQueriesData({ queryKey: QUERY_KEYS.authors });
+  for (const [, data] of currentAuthorsList) {
+    const author = data?.authors?.find(a => a.id === authorId);
+    if (author) return author;
+  }
+  return null;
+};
+
 export const useAuthors = ({ page = PAGINATION.DEFAULT_PAGE, limit = PAGINATION.DEFAULT_LIMIT, search = "", sortBy = "surname", sortOrder = "ASC" } = {}, options = {}) => {
   return useQuery({
     queryKey: [...QUERY_KEYS.authors, { page, limit, search, sortBy, sortOrder }],
@@ -54,7 +63,7 @@ export const useAddAuthor = ({ onSuccess, onError, onSettled, onMutate, ...restO
       };
 
       queryClient.setQueriesData({ queryKey: QUERY_KEYS.authors }, old => {
-        if (!old || !old.authors) return old;
+        if (!old || !old.authors || old.currentPage !== 1) return old;
         return {
           ...old,
           authors: [optimisticAuthor, ...old.authors]
@@ -125,13 +134,7 @@ export const useDeleteAuthor = ({ onSuccess, onError, onMutate, ...restOptions }
 
   return useMutation({
     mutationFn: async (authorId) => {
-      // Check if this is an optimistic entry before making the API call
-      const currentAuthorsList = queryClient.getQueriesData({ queryKey: QUERY_KEYS.authors });
-      let author = null;
-      for (const [, data] of currentAuthorsList) {
-        author = data?.authors?.find(a => a.id === authorId);
-        if (author) break;
-      }
+      const author = findAuthorInCache(queryClient, authorId);
 
       if (author?.isOptimistic) {
         throw new Error('Cannot delete unsaved author. Please wait for it to save first.');
@@ -143,13 +146,7 @@ export const useDeleteAuthor = ({ onSuccess, onError, onMutate, ...restOptions }
 
     // Optimistic update - Remove author immediately from cache
     onMutate: async (authorId) => {
-      // Check if this is an optimistic entry before proceeding
-      const currentAuthorsList = queryClient.getQueriesData({ queryKey: QUERY_KEYS.authors });
-      let author = null;
-      for (const [, data] of currentAuthorsList) {
-        author = data?.authors?.find(a => a.id === authorId);
-        if (author) break;
-      }
+      const author = findAuthorInCache(queryClient, authorId);
 
       if (author?.isOptimistic) {
         // Don't proceed with optimistic update for optimistic entries
