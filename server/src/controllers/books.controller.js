@@ -1,10 +1,15 @@
 import { getAllBooks, createBook, deleteBook } from "../services/books.service.js";
 import AppError from "../utils/AppError.js";
-import { parsePositiveInt, parseNumber, parsePaginationParams } from "../utils/validation.js";
+import { parsePositiveInt, parseNumber, parsePaginationParams, parseSearchParams, parseSortParams } from "../utils/validation.js";
+
+const ALLOWED_BOOK_SORT_FIELDS = ["title", "price", "availableCopies"];
 
 export const listBooks = async (req, res) => {
   const { page, limit } = parsePaginationParams(req.query);
-  const { books, totalBooks } = await getAllBooks({ page, limit });
+  const search = parseSearchParams(req.query);
+  const { sortBy, sortOrder } = parseSortParams(req.query, ALLOWED_BOOK_SORT_FIELDS, "title");
+
+  const { books, totalBooks } = await getAllBooks({ page, limit, search, sortBy, sortOrder });
   const totalPages = Math.ceil(totalBooks / limit);
   return res.json({ books, totalBooks, totalPages, currentPage: page });
 };

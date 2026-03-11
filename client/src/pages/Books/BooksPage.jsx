@@ -14,6 +14,7 @@ import FormInput from '../../components/FormInput/FormInput';
 import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
 import Pagination from '../../components/Pagination/Pagination';
 import EmptyState from '../../components/EmptyState/EmptyState';
+import ListControls from '../../components/ListControls/ListControls';
 import styles from './BooksPage.module.scss';
 
 export default function BooksPage() {
@@ -26,13 +27,16 @@ export default function BooksPage() {
 
   const [searchParams, setSearchParams] = useSearchParams();
   const page = Number(searchParams.get('page')) || 1;
+  const search = searchParams.get('search') || '';
+  const sortBy = searchParams.get('sortBy') || 'title';
+  const sortOrder = searchParams.get('sortOrder') || 'ASC';
 
   const { register, handleSubmit, watch, reset: resetForm, formState: { errors, isValid } } = useForm({
     mode: 'onBlur',
     defaultValues: { numberOfCopies: '1' },
   });
 
-  const { data, isLoading, error, isPlaceholderData } = useBooks({ page });
+  const { data, isLoading, error, isPlaceholderData } = useBooks({ page, search, sortBy, sortOrder });
   const books = data?.books ?? [];
   const totalPages = data?.totalPages ?? 0;
   const currentPage = data?.currentPage ?? page;
@@ -175,7 +179,13 @@ export default function BooksPage() {
   };
 
   const handlePageChange = (newPage) => {
-    setSearchParams(newPage === 1 ? {} : { page: String(newPage) });
+    const newParams = new URLSearchParams(searchParams);
+    if (newPage === 1) {
+      newParams.delete('page');
+    } else {
+      newParams.set('page', String(newPage));
+    }
+    setSearchParams(newParams);
   };
 
   if (isLoading) return <p>Loading books...</p>;
@@ -196,6 +206,18 @@ export default function BooksPage() {
           </Button>
         </div>
       )}
+
+      <ListControls
+        id="books-list-controls"
+        searchPlaceholder="Search books or authors..."
+        sortOptions={[
+          { value: 'title', label: 'Name' },
+          { value: 'price', label: 'Price' },
+          { value: 'availableCopies', label: 'Availability' }
+        ]}
+        defaultSortBy="title"
+        defaultSortOrder="ASC"
+      />
 
       {showForm && (
         <form id="add-book-form" className={styles.form} onSubmit={handleSubmit(onSubmit)}>
@@ -249,15 +271,17 @@ export default function BooksPage() {
         ))}
       </div>
 
-      {books.length === 0 && <EmptyState id="books-empty-state" message="No books in the catalog yet." icon="📚" />}
+      {books.length === 0 && <EmptyState id="books-empty-state" message="No books match your criteria." icon="📚" />}
 
-      <Pagination
-        id="books-pagination"
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-        isDisabled={isPlaceholderData}
-      />
+      {totalPages > 1 && (
+        <Pagination
+          id="books-pagination"
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          isDisabled={isPlaceholderData}
+        />
+      )}
 
       {activeModal && (
         <ConfirmModal
