@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Boat Library - Implementation Guide</title>
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --secondary: #1e293b;
+            --accent: #10b981;
+            --bg: #f8fafc;
+            --text: #334155;
+            --code-bg: #1e293b;
+            --code-text: #f8fafc;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: var(--bg);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 3rem 2rem;
+            border-bottom: 5px solid var(--accent);
+            text-align: center;
+        }
+
+        h1 { margin: 0; font-size: 2.5rem; }
+        h2 { border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem; margin-top: 2.5rem; color: var(--secondary); }
+        h3 { color: var(--primary); margin-top: 1.5rem; }
+
+        .card {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border);
+        }
+
+        code {
+            font-family: 'Fira Code', 'Courier New', Courier, monospace;
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.25rem;
+            font-size: 0.9rem;
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            line-height: 1.4;
+            font-size: 0.9rem;
+            margin: 1rem 0;
+        }
+
+        .highlight { color: var(--accent); font-weight: bold; }
+        .important { border-left: 4px solid #f59e0b; padding-left: 1rem; font-style: italic; background: #fffbeb; padding: 1rem; border-radius: 0 0.5rem 0.5rem 0; }
+
+        .step-container { display: flex; flex-direction: column; gap: 1rem; }
+        .step { display: flex; gap: 1rem; align-items: flex-start; }
+        .step-num {
+            background: var(--primary);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-weight: bold;
+        }
+
+        footer { text-align: center; padding: 2rem; color: #64748b; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>The Boat Library</h1>
+    <p>Implementation Guide: Pagination, Search & Sorting</p>
+</header>
+
+<div class="container">
+    <div class="card">
+        <h2>Overview: The Big Picture</h2>
+        <p>Previously, our application loaded <strong>all items</strong> from the database and filtered them in the browser. While this works for small datasets, it doesn't scale. We have now moved to <strong>Server-Side Filtering</strong>.</p>
+        <div class="step-container">
+            <div class="step">
+                <div class="step-num">1</div>
+                <div><strong>URL-Driven State:</strong> The search query, page number, and sort order are now stored in the URL (e.g., <code>?page=2&search=ocean</code>).</div>
+            </div>
+            <div class="step">
+                <div class="step-num">2</div>
+                <div><strong>API Synchronization:</strong> React Query automatically fetches new data whenever these URL parameters change.</div>
+            </div>
+            <div class="step">
+                <div class="step-num">3</div>
+                <div><strong>Database Efficiency:</strong> The backend uses SQL <code>LIMIT</code>, <code>OFFSET</code>, and <code>WHERE</code> clauses to fetch only what's needed.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Frontend: URL-Driven State</h2>
+        <p>In <code>AuthorsPage.jsx</code>, <code>BooksPage.jsx</code>, and <code>ManageCustomersPage.jsx</code>, we now use <code>useSearchParams</code> from <code>react-router-dom</code>.</p>
+        <h3>1. Syncing State with URL</h3>
+        <pre><code>// Inside AuthorsPage.jsx
+const [searchParams, setSearchParams] = useSearchParams();
+
+const page = Number(searchParams.get('page')) || 1;
+const search = searchParams.get('search') || '';
+const sortBy = searchParams.get('sortBy') || 'surname';
+const sortOrder = searchParams.get('sortOrder') || 'ASC';
+
+// Fetching data using these params
+const { data, isLoading } = useAuthors({ page, search, sortBy, sortOrder });</code></pre>
+        <p><strong>Why?</strong> This allows users to bookmark searches, share links to specific pages, and use the browser's "Back" button to navigate through their search history.</p>
+
+        <h3>2. Handling Transitions</h3>
+        <p>We use <code>placeholderData: keepPreviousData</code> in our API hooks. This prevents the screen from flickering to a loading state while fetching the next page.</p>
+        <pre><code>// Inside authors.api.js
+export const useAuthors = (params) => {
+  return useQuery({
+    queryKey: [...QUERY_KEYS.authors, params],
+    queryFn: () => api.get('/authors', { params }).then(res => res.data),
+    placeholderData: keepPreviousData, // Essential for smooth UX!
+  });
+};</code></pre>
+    </div>
+
+    <div class="card">
+        <h2>Frontend: The New Components</h2>
+        <h3>ListControls Component</h3>
+        <p>This is a reusable component for search and sorting. It features <strong>Debouncing</strong>, which means it waits 500ms after the user stops typing before triggering a search.</p>
+        <pre><code>&lt;ListControls
+  searchPlaceholder="Search books..."
+  sortOptions={[
+    { value: 'title', label: 'Name' },
+    { value: 'price', label: 'Price' }
+  ]}
+/&gt;</code></pre>
+
+        <h3>Pagination Component</h3>
+        <p>It now receives <code>currentPage</code> and <code>totalPages</code> from the backend and updates the URL via <code>onPageChange</code>.</p>
+    </div>
+
+    <div class="card">
+        <h2>Backend: Dynamic SQL Queries</h2>
+        <p>The server now does the heavy lifting using Sequelize.</p>
+        <h3>1. Service-Level Filtering</h3>
+        <p>In <code>authors.service.js</code>, we construct a <code>whereClause</code> based on the search term.</p>
+        <pre><code>const whereClause = {};
+if (search) {
+  whereClause[Op.or] = [
+    { firstName: { [Op.iLike]: `%${search}%` } },
+    { surname: { [Op.iLike]: `%${search}%` } },
+  ];
+}
+
+const { rows, count } = await Author.findAndCountAll({
+  where: whereClause,
+  order: [[sortBy, sortOrder]],
+  limit,
+  offset: (page - 1) * limit,
+});</code></pre>
+        <p><span class="highlight">Op.iLike</span> is used for case-insensitive searching in PostgreSQL.</p>
+
+        <h3>2. Sorting by Virtual Fields</h3>
+        <p>For fields like <code>availableCopies</code> in <code>books.service.js</code>, we use <code>sequelize.literal</code> because it's a computed value.</p>
+    </div>
+
+    <div class="card">
+        <h2>Bonus: Optimistic Updates with Pagination</h2>
+        <div class="important">
+            This was the trickiest part! Since our data structure changed from <code>[Array]</code> to <code>{ authors: [Array], totalAuthors: 100 }</code>, we had to update our optimistic logic.
+        </div>
+        <p>When adding a new author, we now update <strong>all</strong> active author queries to show the new author at the top immediately:</p>
+        <pre><code>// Inside useAddAuthor
+queryClient.setQueriesData({ queryKey: QUERY_KEYS.authors }, old => {
+  if (!old || !old.authors) return old;
+  return {
+    ...old,
+    authors: [optimisticAuthor, ...old.authors]
+  };
+});</code></pre>
+    </div>
+
+    <div class="card">
+        <h2>Summary Checklist</h2>
+        <ul>
+            <li>✅ <strong>Scalability:</strong> Only 10-20 items are loaded at a time.</li>
+            <li>✅ <strong>UX:</strong> Search is debounced; pagination is smooth with placeholder data.</li>
+            <li>✅ <strong>State:</strong> URL is the single source of truth for filters.</li>
+            <li>✅ <strong>Security:</strong> Input parameters are parsed and validated on the backend.</li>
+        </ul>
+    </div>
+</div>
+
+<footer>
+    <p>Generated by Gemini CLI - March 2026</p>
+</footer>
+
+</body>
+</html>
