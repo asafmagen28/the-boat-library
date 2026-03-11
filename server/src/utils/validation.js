@@ -24,3 +24,13 @@ export const parsePaginationParams = (query) => {
   const limit = Math.min(rawLimit, MAX_LIMIT);
   return { page, limit };
 };
+
+export const parseSearchParams = (query) => {
+  return query.search ? query.search.trim() : "";
+};
+
+export const parseSortParams = (query, allowedFields, defaultField) => {
+  const sortBy = allowedFields.includes(query.sortBy) ? query.sortBy : defaultField;
+  const sortOrder = String(query.sortOrder).toUpperCase() === "DESC" ? "DESC" : "ASC";
+  return { sortBy, sortOrder };
+};
