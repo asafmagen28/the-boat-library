@@ -1,4 +1,7 @@
 import { getAllCustomers, getUserBudget, deleteUser, depositToUser, getUserTransactions } from "../services/users.service.js";
+import { parsePositiveInt, parsePaginationParams, parseSearchParams, parseSortParams } from "../utils/validation.js";
+
+const ALLOWED_USER_SORT_FIELDS = ["username", "budget", "createdAt"];
 
 export const getMyBudget = async (req, res) => {
   const budget = await getUserBudget(req.user.id);
@@ -6,8 +9,13 @@ export const getMyBudget = async (req, res) => {
 };
 
 export const listCustomers = async (req, res) => {
-  const customers = await getAllCustomers();
-  return res.json(customers);
+  const { page, limit } = parsePaginationParams(req.query);
+  const search = parseSearchParams(req.query);
+  const { sortBy, sortOrder } = parseSortParams(req.query, ALLOWED_USER_SORT_FIELDS, "username");
+
+  const { customers, totalCustomers } = await getAllCustomers({ page, limit, search, sortBy, sortOrder });
+  const totalPages = Math.ceil(totalCustomers / limit);
+  return res.json({ customers, totalCustomers, totalPages, currentPage: page });
 };
 
 export const removeUser = async (req, res) => {

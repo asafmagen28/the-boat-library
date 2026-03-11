@@ -1,11 +1,14 @@
+import { keepPreviousData } from '@tanstack/react-query';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from './api';
 import { QUERY_KEYS, invalidateQueries } from './cacheUtils';
+import { PAGINATION } from '../constants/api';
 
-export const useCustomers = (options = {}) => {
+export const useCustomers = ({ page = PAGINATION.DEFAULT_PAGE, limit = PAGINATION.DEFAULT_LIMIT, search = "", sortBy = "username", sortOrder = "ASC" } = {}, options = {}) => {
   return useQuery({
-    queryKey: QUERY_KEYS.customers,
-    queryFn: () => api.get('/users').then((res) => res.data),
+    queryKey: [...QUERY_KEYS.customers, { page, limit, search, sortBy, sortOrder }],
+    queryFn: () => api.get('/users', { params: { page, limit, search, sortBy, sortOrder } }).then((res) => res.data),
+    placeholderData: keepPreviousData,
     ...options,
   });
 };
@@ -54,13 +57,17 @@ export const useDeleteUser = ({ onSuccess, onError, onMutate, ...restOptions } =
     onMutate: async (userId) => {
       await queryClient.cancelQueries({ queryKey: QUERY_KEYS.customers });
 
-      const previousCustomers = queryClient.getQueryData(QUERY_KEYS.customers);
+      const previousCustomersList = queryClient.getQueriesData({ queryKey: QUERY_KEYS.customers });
 
-      queryClient.setQueryData(QUERY_KEYS.customers, old =>
-        old?.filter(customer => customer.id !== userId) || []
-      );
+      queryClient.setQueriesData({ queryKey: QUERY_KEYS.customers }, old => {
+        if (!old || !old.customers) return old;
+        return {
+          ...old,
+          customers: old.customers.filter(customer => customer.id !== userId)
+        };
+      });
 
-      return { previousCustomers };
+      return { previousCustomersList };
     },
 
     onSuccess: (data, userId, context) => {
@@ -71,8 +78,10 @@ export const useDeleteUser = ({ onSuccess, onError, onMutate, ...restOptions } =
     },
 
     onError: (error, userId, context) => {
-      if (context?.previousCustomers) {
-        queryClient.setQueryData(QUERY_KEYS.customers, context.previousCustomers);
+      if (context?.previousCustomersList) {
+        context.previousCustomersList.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data);
+        });
       }
 
       // Call component's onError if provided
