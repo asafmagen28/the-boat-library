@@ -8,8 +8,11 @@ import PageHeader from '../../components/PageHeader/PageHeader';
 import Button from '../../components/Button/Button';
 import FormInput from '../../components/FormInput/FormInput';
 import { NAME_REGEX } from '../../constants/validation';
+import { useSearchParams } from 'react-router-dom';
 import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
 import EmptyState from '../../components/EmptyState/EmptyState';
+import ListControls from '../../components/ListControls/ListControls';
+import Pagination from '../../components/Pagination/Pagination';
 import styles from './AuthorsPage.module.scss';
 
 export default function AuthorsPage() {
@@ -18,10 +21,19 @@ export default function AuthorsPage() {
   const [showForm, setShowForm] = useState(false);
   const [authorToDelete, setAuthorToDelete] = useState(null);
 
+  const [searchParams, setSearchParams] = useSearchParams();
+  const page = Number(searchParams.get('page')) || 1;
+  const search = searchParams.get('search') || '';
+  const sortBy = searchParams.get('sortBy') || 'surname';
+  const sortOrder = searchParams.get('sortOrder') || 'ASC';
+
   const { register, handleSubmit, reset: resetForm, formState: { errors, isValid } } = useForm({ mode: 'onBlur' });
 
   const { showToast } = useToast();
-  const { data: authors = [], isLoading, error } = useAuthors();
+  const { data, isLoading, error, isPlaceholderData } = useAuthors({ page, search, sortBy, sortOrder });
+  const authors = data?.authors ?? [];
+  const totalPages = data?.totalPages ?? 0;
+  const currentPage = data?.currentPage ?? page;
 
   const addAuthor = useAddAuthor({
     onSuccess: () => {
@@ -38,7 +50,6 @@ export default function AuthorsPage() {
     },
     onError: (error) => {
       setAuthorToDelete(null);
-      // Provide user-friendly error messages
       if (error.message.includes('unsaved author')) {
         showToast('Please wait for the author to save before deleting', 'warning');
       } else {
@@ -65,6 +76,16 @@ export default function AuthorsPage() {
     addAuthor.mutate({ firstName: data.firstName.trim(), surname: data.surname.trim() });
   };
 
+  const handlePageChange = (newPage) => {
+    const newParams = new URLSearchParams(searchParams);
+    if (newPage === 1) {
+      newParams.delete('page');
+    } else {
+      newParams.set('page', String(newPage));
+    }
+    setSearchParams(newParams);
+  };
+
   if (isLoading) return <p>Loading authors...</p>;
   if (error) return <p id="authors-error">Error: {error.message}</p>;
 
@@ -83,6 +104,17 @@ export default function AuthorsPage() {
           </Button>
         </div>
       )}
+
+      <ListControls
+        id="authors-list-controls"
+        searchPlaceholder="Search by author name..."
+        sortOptions={[
+          { value: 'surname', label: 'Surname' },
+          { value: 'firstName', label: 'First Name' }
+        ]}
+        defaultSortBy="surname"
+        defaultSortOrder="ASC"
+      />
 
       {showForm && (
         <form id="add-author-form" className={styles.form} onSubmit={handleSubmit(onSubmit)}>
@@ -103,7 +135,7 @@ export default function AuthorsPage() {
         </form>
       )}
 
-      <div className={styles.list}>
+      <div className={`${styles.list} ${isPlaceholderData ? styles.loading : ''}`}>
         {authors.map((author) => (
           <div
             key={author.id}
@@ -140,7 +172,17 @@ export default function AuthorsPage() {
         ))}
       </div>
 
-      {authors.length === 0 && <EmptyState id="authors-empty-state" message="No authors found." icon="✍️" />}
+      {authors.length === 0 && <EmptyState id="authors-empty-state" message="No authors match your criteria." icon="✍️" />}
+
+      {totalPages > 1 && (
+        <Pagination
+          id="authors-pagination"
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          isDisabled={isPlaceholderData}
+        />
+      )}
 
       <ConfirmModal
         id="delete-author-modal"
