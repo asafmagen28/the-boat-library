@@ -1,10 +1,25 @@
+import { Op } from "sequelize";
 import { sequelize, User, Transaction, TransactionType, Loan, Copy, Book } from "../models/index.js";
 import { ROLES } from "../constants/roles.js";
 import AppError from "../utils/AppError.js";
 
-export const getAllCustomers = async () => {
-  return User.findAll({
-    where: { roleId: ROLES.CUSTOMER },
+export const getAllCustomers = async ({ page = 1, limit = 10, search = "", sortBy = "username", sortOrder = "ASC" } = {}) => {
+  const whereClause = { roleId: ROLES.CUSTOMER };
+  if (search) {
+    whereClause.username = { [Op.iLike]: `%${search}%` };
+  }
+
+  let orderClause = [[sortBy, sortOrder]];
+  if (sortBy === "budget") {
+    orderClause = [[sequelize.literal("budget"), sortOrder]];
+  }
+
+  // Handle findAndCountAll with a GROUP BY using subQuery: false usually breaks count
+  // We'll compute the count explicitly
+  const totalCustomers = await User.count({ where: whereClause });
+
+  const customers = await User.findAll({
+    where: whereClause,
     attributes: [
       "id",
       "username",
@@ -13,7 +28,13 @@ export const getAllCustomers = async () => {
     ],
     include: [{ model: Transaction, as: "receivedTransactions", attributes: [], required: false }],
     group: ["User.id"],
+    order: orderClause,
+    limit,
+    offset: (page - 1) * limit,
+    subQuery: false,
   });
+
+  return { customers, totalCustomers };
 };
 
 export const getUserBudget = async (userId) => {

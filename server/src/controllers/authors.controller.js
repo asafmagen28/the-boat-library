@@ -1,11 +1,18 @@
 import { getAllAuthors, createAuthor, deleteAuthor } from "../services/authors.service.js";
 import AppError from "../utils/AppError.js";
 import { NAME_REGEX } from "../constants/validation.js";
-import { parsePositiveInt } from "../utils/validation.js";
+import { parsePositiveInt, parsePaginationParams, parseSearchParams, parseSortParams } from "../utils/validation.js";
+
+const ALLOWED_AUTHOR_SORT_FIELDS = ["firstName", "surname"];
 
 export const listAuthors = async (req, res) => {
-  const authors = await getAllAuthors();
-  return res.json(authors);
+  const { page, limit } = parsePaginationParams(req.query);
+  const search = parseSearchParams(req.query);
+  const { sortBy, sortOrder } = parseSortParams(req.query, ALLOWED_AUTHOR_SORT_FIELDS, "surname");
+
+  const { authors, totalAuthors } = await getAllAuthors({ page, limit, search, sortBy, sortOrder });
+  const totalPages = Math.ceil(totalAuthors / limit);
+  return res.json({ authors, totalAuthors, totalPages, currentPage: page });
 };
 
 export const addAuthor = async (req, res) => {

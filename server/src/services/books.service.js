@@ -1,12 +1,37 @@
+import { Op } from "sequelize";
 import { sequelize, Book, Author, Copy } from "../models/index.js";
 import { getStatus } from "../utils/lookupCache.js";
 import AppError from "../utils/AppError.js";
 
-export const getAllBooks = async ({ page = 1, limit = 10 } = {}) => {
+export const getAllBooks = async ({ page = 1, limit = 10, search = "", sortBy = "title", sortOrder = "ASC" } = {}) => {
   const availableStatus = await getStatus("available");
 
+  const whereClause = {};
+  if (search) {
+    const searchCondition = { [Op.iLike]: `%${search}%` };
+    whereClause[Op.or] = [
+      { title: searchCondition },
+      { "$author.firstName$": searchCondition },
+      { "$author.surname$": searchCondition },
+      sequelize.where(
+        sequelize.fn('concat', sequelize.col('author.firstName'), ' ', sequelize.col('author.surname')),
+        searchCondition
+      ),
+      sequelize.where(
+        sequelize.fn('concat', sequelize.col('author.surname'), ' ', sequelize.col('author.firstName')),
+        searchCondition
+      )
+    ];
+  }
+
+  let orderClause = [[sortBy, sortOrder]];
+  if (sortBy === "availableCopies") {
+    orderClause = [[sequelize.literal('"availableCopies"'), sortOrder]];
+  }
+
   const { rows: books, count: totalBooks } = await Book.findAndCountAll({
-    order: [["title", "ASC"]],
+    where: whereClause,
+    order: orderClause,
     limit,
     offset: (page - 1) * limit,
     distinct: true,

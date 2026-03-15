@@ -35,10 +35,10 @@ const processBookQueries = (queryClient, queryKey, processor) => {
   return rollbackData;
 };
 
-export const useBooks = ({ page = PAGINATION.DEFAULT_PAGE, limit = PAGINATION.DEFAULT_LIMIT } = {}, options = {}) => {
+export const useBooks = ({ page = PAGINATION.DEFAULT_PAGE, limit = PAGINATION.DEFAULT_LIMIT, search = "", sortBy = "title", sortOrder = "ASC" } = {}, options = {}) => {
   return useQuery({
-    queryKey: [...QUERY_KEYS.books, { page, limit }],
-    queryFn: () => api.get('/books', { params: { page, limit } }).then((res) => res.data),
+    queryKey: [...QUERY_KEYS.books, { page, limit, search, sortBy, sortOrder }],
+    queryFn: () => api.get('/books', { params: { page, limit, search, sortBy, sortOrder } }).then((res) => res.data),
     placeholderData: keepPreviousData,
     ...options,
   });

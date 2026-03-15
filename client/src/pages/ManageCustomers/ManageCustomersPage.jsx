@@ -1,10 +1,13 @@
 import { useState } from 'react';
+import { useListParams } from '../../hooks';
 import { useToast } from '../../context/ToastContext';
 import { useCustomers, useDeleteUser, useAddBalance } from '../../services/users.api';
 import PageHeader from '../../components/PageHeader/PageHeader';
 import Button from '../../components/Button/Button';
 import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
 import EmptyState from '../../components/EmptyState/EmptyState';
+import ListControls from '../../components/ListControls/ListControls';
+import Pagination from '../../components/Pagination/Pagination';
 import LoadFundsModal from './LoadFundsModal';
 import { formatBalance, formatDate } from '../../utils/formatters';
 import { getUserFriendlyErrorMessage } from '../../utils/errorMessages';
@@ -12,7 +15,13 @@ import styles from './ManageCustomersPage.module.scss';
 
 export default function ManageCustomersPage() {
   const { showToast } = useToast();
-  const { data: customers = [], isLoading, error } = useCustomers();
+  const { page, search, sortBy, sortOrder, handlePageChange } = useListParams('username', 'ASC');
+
+  const { data, isLoading, error, isPlaceholderData } = useCustomers({ page, search, sortBy, sortOrder });
+  const customers = data?.customers ?? [];
+  const totalPages = data?.totalPages ?? 0;
+  const currentPage = data?.currentPage ?? page;
+
   const [customerToDelete, setCustomerToDelete] = useState(null);
   const [customerToLoad, setCustomerToLoad] = useState(null);
 
@@ -47,6 +56,7 @@ export default function ManageCustomersPage() {
     addBalance.mutate({ userId: customerToLoad.id, amount });
   };
 
+
   if (isLoading) return <p>Loading customers...</p>;
   if (error) return <p id="manage-customers-error">Error: {getUserFriendlyErrorMessage(error, 'Failed to load customers. Please try again.')}</p>;
 
@@ -54,7 +64,19 @@ export default function ManageCustomersPage() {
     <section id="manage-customers-page">
       <PageHeader id="manage-customers-page-header" title="Manage Customers" subtitle="View and manage customer accounts" />
 
-      <div className={styles.list}>
+      <ListControls
+        id="customers-list-controls"
+        searchPlaceholder="Search customers by username..."
+        sortOptions={[
+          { value: 'username', label: 'Username' },
+          { value: 'budget', label: 'Balance' },
+          { value: 'createdAt', label: 'Join Date' }
+        ]}
+        defaultSortBy="username"
+        defaultSortOrder="ASC"
+      />
+
+      <div className={`${styles.list} ${isPlaceholderData ? styles.loading : ''}`}>
         {customers.map((customer) => (
           <div key={customer.id} id={`customer-item-${customer.id}`} className={styles.customerItem}>
             <div className={styles.customerInfo}>
@@ -86,7 +108,17 @@ export default function ManageCustomersPage() {
         ))}
       </div>
 
-      {customers.length === 0 && <EmptyState id="manage-customers-empty-state" message="No customers found." icon="👤" />}
+      {customers.length === 0 && <EmptyState id="manage-customers-empty-state" message="No customers match your criteria." icon="👤" />}
+
+      {totalPages > 1 && (
+        <Pagination
+          id="customers-pagination"
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          isDisabled={isPlaceholderData}
+        />
+      )}
 
       <ConfirmModal
         id="delete-customer-modal"
